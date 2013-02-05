@@ -132,9 +132,13 @@ public class ProtocBundledMojo extends AbstractMojo
             throw new MojoExecutionException("Unable to determine CPU architecture");
         }
 
-        final String arch = osArchCanon.get(archName.toLowerCase());
+        String arch = osArchCanon.get(archName.toLowerCase());
         if (arch == null) {
             throw new MojoExecutionException("Unable to determine CPU arch id for " + archName);
+        }
+
+        if("win32".equals(os) && "x86_64".equals(arch)){
+            arch = "x86";
         }
 
         return "protoc-" + protobufVersion + "-" + os + "-" + arch
