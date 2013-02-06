@@ -33,7 +33,7 @@ Maven Plugin Mojo for compiling Protobuf schema files. Protobuf compiler binarie
   <plugin>
     <groupId>com.comoyo.maven.plugins</groupId>
     <artifactId>protoc-bundled-plugin</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <executions>
       <execution>
         <goals>
