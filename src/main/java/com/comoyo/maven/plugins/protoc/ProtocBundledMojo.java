@@ -24,7 +24,7 @@ import java.util.Set;
 
 /**
  * Maven Plugin Mojo for compiling Protobuf schema files.  Protobuf
- * compiler binaries for varions platforms and protobuf versions are
+ * compiler binaries for various platforms and protobuf versions are
  * bundled with the plugin and used as required.
  *
  * @goal run
@@ -137,7 +137,7 @@ public class ProtocBundledMojo extends AbstractMojo
             throw new MojoExecutionException("Unable to determine CPU arch id for " + archName);
         }
 
-        // Pre-build protoc binaries for Windows use the same image
+        // Pre-built protoc binaries for Windows use the same image
         // for 32- and 64-bit systems.
         if ("win32".equals(os) && "x86_64".equals(arch)) {
             arch = "x86";

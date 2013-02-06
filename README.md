@@ -1,7 +1,7 @@
 protoc-bundled-plugin
 =====================
 
-Maven Plugin Mojo for compiling Protobuf schema files. Protobuf compiler binaries for varions platforms and protobuf versions are bundled with the plugin and used as required.
+Maven Plugin Mojo for compiling Protobuf schema files. Protobuf compiler binaries for various platforms and protobuf versions are bundled with the plugin and used as required.
 
 ### Available parameters
 
