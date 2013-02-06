@@ -137,7 +137,9 @@ public class ProtocBundledMojo extends AbstractMojo
             throw new MojoExecutionException("Unable to determine CPU arch id for " + archName);
         }
 
-        if("win32".equals(os) && "x86_64".equals(arch)){
+        // Pre-build protoc binaries for Windows use the same image
+        // for 32- and 64-bit systems.
+        if ("win32".equals(os) && "x86_64".equals(arch)) {
             arch = "x86";
         }
 
@@ -241,9 +243,7 @@ public class ProtocBundledMojo extends AbstractMojo
     }
 
     /**
-     * Compile single file Ensure we have a suitable protoc binary available.  If
-     * protocExec is explicitly given, use that.  Otherwise find and
-     * extract suitable protoc from plugin bundle.
+     * Compile single protobuf schema file.
      *
      * @param dir   base dir for input file, used to resolve includes
      * @param input   input file to compile
