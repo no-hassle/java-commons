@@ -19,8 +19,14 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>2.0</version>
+      <version>3.0.4</version>
     </dependency>
 
     <dependency>
@@ -35,13 +41,13 @@
       <version>3.2</version>
       <scope>provided</scope>
     </dependency>
-	
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
     </dependency>
-            
+
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
@@ -81,15 +87,55 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-compiler-plugin</artifactId>
-	<version>2.3.2</version>
-	<configuration>
-	  <encoding>${project.build.sourceEncoding}</encoding>
-	  <source>${java.version}</source>
-	  <target>${java.version}</target>
-	</configuration>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-linux-x86</file>
+                  <type>exe</type>
+                  <classifier>2.4.1-linux-x86</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-linux-x86_64</file>
+                  <type>exe</type>
+                  <classifier>2.4.1-linux-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-mac_os_x-x86_64</file>
+                  <type>exe</type>
+                  <classifier>2.4.1-mac_os_x-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-win32-x86.exe</file>
+                  <type>exe</type>
+                  <classifier>2.4.1-win32-x86</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -1,12 +1,18 @@
 package com.comoyo.maven.plugins.protoc;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.artifact.Artifact;
+import org.apache.maven.repository.RepositorySystem;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -20,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 
 /**
@@ -35,6 +42,15 @@ import java.util.Set;
 public class ProtocBundledMojo extends AbstractMojo
 {
     /**
+     * Plugin descriptor.
+     *
+     * @component role="org.apache.maven.plugin.descriptor.PluginDescriptor"
+     * @required
+     * @readonly
+     */
+    private PluginDescriptor pluginDescriptor;
+
+    /**
      * The Maven project.
      *
      * @parameter property="project"
@@ -42,6 +58,25 @@ public class ProtocBundledMojo extends AbstractMojo
      * @readonly
      */
     private MavenProject project;
+
+    /**
+     * Used to look up Artifacts in the remote repository.
+     *
+     * @component role="org.apache.maven.repository.RepositorySystem"
+     * @required
+     * @readonly
+     */
+    protected RepositorySystem repositorySystem;
+
+    /**
+     * List of Remote Repositories used by the resolver
+     *
+     * @parameter property="project.remoteArtifactRepositories"
+     * @readonly
+     * @required
+     */
+    protected List remoteRepositories;
+
 
     /**
      * Protobuf version to compile schema files for.  If omitted,
@@ -70,15 +105,6 @@ public class ProtocBundledMojo extends AbstractMojo
      *     default-value="${project.build.directory}/generated-sources/protobuf"
      */
     private File outputDirectory;
-
-    /**
-     * Directory for extracted helper binaries (protoc).
-     *
-     * @parameter
-     *     property="binaryDirectory"
-     *     default-value="${project.build.directory}/helper-binaries"
-     */
-    private File binaryDirectory;
 
     /**
      * Path to existing protoc to use.  Overrides auto-detection and
@@ -143,42 +169,45 @@ public class ProtocBundledMojo extends AbstractMojo
             arch = "x86";
         }
 
-        return "protoc-" + protobufVersion + "-" + os + "-" + arch
-            + (os.equals("win32") ? ".exe" : "");
+        return protobufVersion + "-" + os + "-" + arch;
     }
 
     /**
-     * Copy named protoc binary from bundled resource stream to helper
-     * binary directory.
+     * Return reference to suitable protoc binary artifact, download
+     * from remote repository if necessary.
      *
-     * @param protocName
+     * @param protocName   protoc specifier
      */
-    private File extractProtocHelper(String protocName)
+    private File resolveProtocArtifact(String protocName)
         throws MojoExecutionException
     {
-        final File file = FileUtils.getFile(binaryDirectory, protocName);
-        if (file.exists() && file.canExecute() && file.length() > 0) {
-            return file;
+        Artifact artifact
+            = repositorySystem.createArtifactWithClassifier(
+                pluginDescriptor.getGroupId(),
+                pluginDescriptor.getArtifactId(),
+                pluginDescriptor.getVersion(),
+                "exe", protocName);
+
+        getLog().info("Using protoc " + artifact);
+        ArtifactResolutionRequest request = new ArtifactResolutionRequest()
+            .setArtifact(artifact)
+            .setRemoteRepositories(remoteRepositories);
+        ArtifactResolutionResult result = repositorySystem.resolve(request);
+        if (!result.isSuccess()) {
+            throw new MojoExecutionException(
+                "Unable to resolve dependency on protoc binary artifact, sorry: "
+                    + result.toString());
         }
 
-        final InputStream input
-            = getClass().getResourceAsStream("/bin/" + protobufVersion + "/" + protocName);
-        if (input == null) {
-            throw new MojoExecutionException("No " + protocName + " bundled, sorry!");
+        Set<Artifact> artifacts = result.getArtifacts();
+        if (artifacts.size() != 1) {
+            throw new MojoExecutionException(
+                "Unexpected number of artifacts returned when resolving protoc binary");
         }
-
-        try {
-            binaryDirectory.mkdirs();
-            final FileOutputStream output = new FileOutputStream(file);
-            IOUtils.copy(input, output);
-            input.close();
-            output.close();
-            file.setExecutable(true, false);
-            return file;
-        }
-        catch (Exception e) {
-            throw new MojoExecutionException("Unable to extract protoc compiler", e);
-        }
+        Artifact protocArtifact = artifacts.iterator().next();
+        File file = protocArtifact.getFile();
+        file.setExecutable(true, false);
+        return file;
     }
 
     /**
@@ -239,7 +268,7 @@ public class ProtocBundledMojo extends AbstractMojo
         }
 
         final String protocName = determineProtocForSystem();
-        protocExec = extractProtocHelper(protocName);
+        protocExec = resolveProtocArtifact(protocName);
     }
 
     /**
@@ -316,8 +345,7 @@ public class ProtocBundledMojo extends AbstractMojo
         for (File input : inputDirectories){
             getLog().info("  " + input);
         }
-        getLog().info("Compiling to " + outputDirectory + " using "
-                      + protocExec.getName());
+        getLog().info("Compiling to " + outputDirectory);
         compileAllFiles();
     }
 }
