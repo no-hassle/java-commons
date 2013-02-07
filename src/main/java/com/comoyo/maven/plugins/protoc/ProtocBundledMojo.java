@@ -239,7 +239,7 @@ public class ProtocBundledMojo extends AbstractMojo
         Set<Artifact> artifacts = result.getArtifacts();
         if (artifacts.size() != 1) {
             throw new MojoExecutionException(
-                "Unexpected number of artifacts returned when resolving protoc binary");
+                "Unexpected number of artifacts returned when resolving protoc binary (" + artifacts.size() + ")");
         }
         Artifact protocArtifact = artifacts.iterator().next();
         File file = protocArtifact.getFile();
