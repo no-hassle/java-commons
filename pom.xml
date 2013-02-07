@@ -101,25 +101,65 @@
             </goals>
             <configuration>
               <artifacts>
+		<!-- 2.3.0 -->
                 <artifact>
-                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-linux-x86</file>
+                  <file>src/main/binaries/2.3.0/protoc-2.3.0-linux-x86</file>
+                  <type>exe</type>
+                  <classifier>2.3.0-linux-x86</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/2.3.0/protoc-2.3.0-linux-x86_64</file>
+                  <type>exe</type>
+                  <classifier>2.3.0-linux-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/2.3.0/protoc-2.3.0-mac_os_x-x86_64</file>
+                  <type>exe</type>
+                  <classifier>2.3.0-mac_os_x-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/2.3.0/protoc-2.3.0-win32-x86.exe</file>
+                  <type>exe</type>
+                  <classifier>2.3.0-win32-x86</classifier>
+                </artifact>
+
+		<!-- 2.4.1 -->
+                <artifact>
+                  <file>src/main/binaries/2.4.1/protoc-2.4.1-linux-x86</file>
                   <type>exe</type>
                   <classifier>2.4.1-linux-x86</classifier>
                 </artifact>
                 <artifact>
-                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-linux-x86_64</file>
+                  <file>src/main/binaries/2.4.1/protoc-2.4.1-linux-x86_64</file>
                   <type>exe</type>
                   <classifier>2.4.1-linux-x86_64</classifier>
                 </artifact>
                 <artifact>
-                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-mac_os_x-x86_64</file>
+                  <file>src/main/binaries/2.4.1/protoc-2.4.1-mac_os_x-x86_64</file>
                   <type>exe</type>
                   <classifier>2.4.1-mac_os_x-x86_64</classifier>
                 </artifact>
                 <artifact>
-                  <file>src/main/binaries/bin/2.4.1/protoc-2.4.1-win32-x86.exe</file>
+                  <file>src/main/binaries/2.4.1/protoc-2.4.1-win32-x86.exe</file>
                   <type>exe</type>
                   <classifier>2.4.1-win32-x86</classifier>
+                </artifact>
+
+		<!-- 2.5.0rc1 -->
+                <artifact>
+                  <file>src/main/binaries/2.5.0rc1/protoc-2.5.0rc1-linux-x86</file>
+                  <type>exe</type>
+                  <classifier>2.5.0rc1-linux-x86</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/2.5.0rc1/protoc-2.5.0rc1-linux-x86_64</file>
+                  <type>exe</type>
+                  <classifier>2.5.0rc1-linux-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/2.5.0rc1/protoc-2.5.0rc1-win32-x86.exe</file>
+                  <type>exe</type>
+                  <classifier>2.5.0rc1-win32-x86</classifier>
                 </artifact>
               </artifacts>
             </configuration>
