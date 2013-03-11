@@ -6,6 +6,9 @@
   <artifactId>protoc-bundled-plugin</artifactId>
   <version>1.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
+  <prerequisites>
+    <maven>3</maven>
+  </prerequisites>
 
   <name>protoc-bundled-plugin -- Batteries included Maven Protobuf compiler Plugin</name>
 
