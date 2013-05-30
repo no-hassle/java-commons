@@ -130,7 +130,6 @@ public class ProtocBundledMojo extends AbstractMojo
      *
      * @parameter
      *     property="inputDirectories"
-     *     default-value="src/main/protobuf"
      */
     private File[] inputDirectories;
 
@@ -379,6 +378,9 @@ public class ProtocBundledMojo extends AbstractMojo
     {
         ensureProtocBinaryPresent();
         getLog().info("Input directories:");
+        if (inputDirectories.length == 0) {
+            inputDirectories = new File[]{new File(project.getBasedir(), "src/main/protobuf")};
+        }
         for (File input : inputDirectories){
             getLog().info("  " + input);
         }
