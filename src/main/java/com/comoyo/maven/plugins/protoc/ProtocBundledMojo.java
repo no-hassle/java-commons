@@ -295,11 +295,10 @@ public class ProtocBundledMojo extends AbstractMojo
             if (protobufArtifactVersion != null
                 && !protobufVersion.equals(protobufArtifactVersion))
             {
-                throw new MojoExecutionException(
-                    "Project includes protobuf-java artifact of version "
-                        + protobufArtifactVersion
-                        + " while protoc is set to compile for version "
-                        + protobufVersion);
+                getLog().warn("Project includes protobuf-java artifact of version "
+                              + protobufArtifactVersion
+                              + " while protoc is set to compile for version "
+                              + protobufVersion);
             }
         }
 
