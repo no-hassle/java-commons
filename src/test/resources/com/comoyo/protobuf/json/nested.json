@@ -1,0 +1,12 @@
+{
+    "child": {
+	"grand_child": [
+	    {
+		"string_1": "foo"
+	    },
+	    {
+		"string_1": "bar"
+	    }
+	]
+    }
+}

@@ -1,0 +1,63 @@
+package pbjson;
+option java_package = "com.comoyo.protobuf.json";
+option java_outer_classname = "TestObjects";
+
+enum Enumeration {
+    FIRST = 1;
+    SECOND = 2;
+    THIRD = 3;
+}
+
+message Empty {
+}
+
+message AllFields {
+    optional string string_1 = 1;
+    optional string string_2 = 2;
+    repeated string string_r1 = 3;
+    repeated string string_r2 = 4;
+    repeated string string_r3 = 5;
+    optional bool bool_1 = 11;
+    optional bool bool_2 = 12;
+    repeated bool bool_r1 = 13;
+    repeated bool bool_r2 = 14;
+    repeated bool bool_r3 = 15;
+    optional int64 int64_1 = 21;
+    optional int64 int64_2 = 22;
+    optional int64 int64_3 = 23;
+    optional int64 int64_4 = 24;
+    optional int32 int32_1 = 31;
+    optional int32 int32_2 = 32;
+    optional double double_1 = 41;
+    optional double double_2 = 42;
+    optional double double_3 = 43;
+    optional double double_4 = 44;
+    repeated double double_r1 = 45;
+    repeated double double_r2 = 46;
+    repeated double double_r3 = 47;
+    optional double float_1 = 51;
+    optional double float_2 = 52;
+    optional double float_3 = 53;
+    optional double float_4 = 54;
+    optional Enumeration enum_1 = 61;
+    optional Enumeration enum_2 = 62;
+}
+
+message Nested {
+    message Child {
+	message GrandChild {
+	    optional string string_1 = 1;
+	}
+	repeated GrandChild grand_child = 1;
+    }
+    optional Child child = 1;
+}
+
+message Defaults {
+    optional string string_1 = 1;
+    optional string string_2 = 2 [default = "default_2"];
+    optional int32 int32_1 = 11;
+    optional int32 int32_2 = 12 [default = 42];
+    optional bool bool_1 = 21;
+    optional bool bool_2 = 22 [default = true];
+}
