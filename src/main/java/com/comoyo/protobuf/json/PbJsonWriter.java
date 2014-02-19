@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonGenerator;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -82,23 +83,41 @@ public class PbJsonWriter
      * Generate JSON document from given {@link Message} object.
      * @param message Protobuf value object to serialize
      * @return JSON document representing given value object
+     * @throws WriterException if unable to produce a serialized
+     * message.
      */
     public String generate(Message message)
         throws WriterException
     {
         try {
             StringWriter writer = new StringWriter();
-            JsonGenerator generator = factory.createJsonGenerator(writer);
-            if (usePrettyPrinter) {
-                generator.useDefaultPrettyPrinter();
-            }
-            generateObject(message, generator);
-            generator.close();
-            writer.flush();
+            generateTo(message, writer);
             return writer.toString();
         }
         catch (IOException e) {
             throw new WriterException("Unable to write serialized message", e);
+        }
+    }
+
+    /**
+     * Write JSON document from given {@link Message} object to a {@link Writer}.
+     * @param message Protobuf value object to serialize
+     * @param writer Serialized JSON is written to this.
+     * @throws IOException if unable to write the serialized message to the
+     *         {@link Writer}
+     * @throws WriterException if unable to produce a serialized message.
+     */
+    public void generateTo(Message message, Writer writer)
+            throws IOException, WriterException
+    {
+        try (JsonGenerator generator = factory.createJsonGenerator(writer)) {
+            if (usePrettyPrinter) {
+                generator.useDefaultPrettyPrinter();
+            }
+            generateObject(message, generator);
+        }
+        finally {
+            writer.flush();
         }
     }
 
