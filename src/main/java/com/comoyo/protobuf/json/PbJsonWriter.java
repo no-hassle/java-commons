@@ -121,7 +121,7 @@ public class PbJsonWriter
         }
     }
 
-    private void generateObject(Message message, JsonGenerator generator)
+    protected void generateObject(Message message, JsonGenerator generator)
         throws WriterException, IOException
     {
         final Descriptors.Descriptor descriptor = message.getDescriptorForType();

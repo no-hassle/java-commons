@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xmlns="http://maven.apache.org/POM/4.0.0"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>pb-json</artifactId>
   <groupId>com.comoyo.protobuf</groupId>
 
   <name>pb-json - Tools for working with Protobuf and Json</name>
-  <version>0-SNAPSHOT</version>
+  <version>${api.version}-SNAPSHOT</version>
   <url>https://github.com/comoyo/pb-json</url>
 
   <properties>
-    <protoc.plugin.version>1.2.0</protoc.plugin.version>
+    <api.version>1</api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <protoc.plugin.version>1.2.0</protoc.plugin.version>
+    <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
   </properties>
 
   <packaging>jar</packaging>
@@ -40,7 +42,7 @@
         </configuration>
       </plugin>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.12</version>
         <configuration>
@@ -49,21 +51,21 @@
       </plugin>
 
       <plugin>
-	<groupId>com.comoyo.maven.plugins</groupId>
-	<artifactId>protoc-bundled-plugin</artifactId>
-	<version>${protoc.plugin.version}</version>
-	<executions>
-	  <execution>
-	    <goals>
-	      <goal>run</goal>
-	    </goals>
-	  </execution>
-	</executions>
+        <groupId>com.comoyo.maven.plugins</groupId>
+        <artifactId>protoc-bundled-plugin</artifactId>
+        <version>${protoc.plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
-	  <inputDirectories>
-	    <inputDirectory>${project.basedir}/src/test/protobuf</inputDirectory>
-	  </inputDirectories>
-	</configuration>
+          <inputDirectories>
+            <inputDirectory>${project.basedir}/src/test/protobuf</inputDirectory>
+          </inputDirectories>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -88,6 +90,9 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
           <version>2.1</version>
+          <configuration>
+            <newVersion>${api.version}.${buildNum}</newVersion>
+          </configuration>
       </plugin>
       <plugin>
           <artifactId>maven-scm-plugin</artifactId>
@@ -95,6 +100,29 @@
           <configuration>
               <tag>${project.artifactId}-${project.version}</tag>
           </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <show>package</show>
+          <quiet>true</quiet>
+          <links>
+            <link>https://developers.google.com/protocol-buffers/docs/reference/java</link>
+            <link>http://jackson.codehaus.org/1.9.9/javadoc</link>
+          </links>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -121,8 +149,12 @@
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
-      <version>1.9.12</version>
+      <version>${codehaus.jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>${codehaus.jackson.version}</version>
     </dependency>
   </dependencies>
 </project>
-
