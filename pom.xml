@@ -33,6 +33,7 @@
   <modules>
     <module>pb-json</module>
     <module>amazonaws-utils</module>
+    <module>logging-context</module>
   </modules>
 
   <build>
