@@ -10,6 +10,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <protoc.plugin.version>1.2.0</protoc.plugin.version>
     <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
+    <google.guava.version>14.0</google.guava.version>
   </properties>
 
   <name>Comoyo Commons Multi-Module POM</name>
@@ -31,6 +32,7 @@
 
   <modules>
     <module>pb-json</module>
+    <module>amazonaws-utils</module>
   </modules>
 
   <build>
