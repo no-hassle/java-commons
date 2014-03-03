@@ -34,6 +34,7 @@
     <module>pb-json</module>
     <module>amazonaws-utils</module>
     <module>logging-context</module>
+    <module>logging-context-gelf</module>
   </modules>
 
   <build>
