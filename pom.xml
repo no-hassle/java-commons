@@ -1,72 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>pb-json</artifactId>
-  <groupId>com.comoyo.protobuf</groupId>
-
-  <name>pb-json - Tools for working with Protobuf and Json</name>
-  <version>1.0-SNAPSHOT</version>
-  <url>https://github.com/comoyo/pb-json</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <protoc.plugin.version>1.2.0</protoc.plugin.version>
     <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
+    <google.guava.version>14.0</google.guava.version>
   </properties>
 
-  <packaging>jar</packaging>
+  <name>Comoyo Commons Multi-Module POM</name>
+  <groupId>com.comoyo</groupId>
+  <artifactId>commons</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <url>https://github.com/comoyo/commons</url>
+  <packaging>pom</packaging>
 
   <scm>
     <developerConnection>
-      scm:git:ssh://git@github.com/comoyo/pb-json
+      scm:git:ssh://git@github.com/comoyo/commons
     </developerConnection>
     <connection>
-      scm:git:ssh://git@github.com/comoyo/pb-json
+      scm:git:ssh://git@github.com/comoyo/commons
     </connection>
   </scm>
 
+  <modules>
+    <module>pb-json</module>
+    <module>amazonaws-utils</module>
+    <module>logging-context</module>
+    <module>logging-context-gelf</module>
+  </modules>
+
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12</version>
-        <configuration>
-          <redirectTestOutputToFile>false</redirectTestOutputToFile>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>com.comoyo.maven.plugins</groupId>
-        <artifactId>protoc-bundled-plugin</artifactId>
-        <version>${protoc.plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <inputDirectories>
-            <inputDirectory>${project.basedir}/src/test/protobuf</inputDirectory>
-          </inputDirectories>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
@@ -85,6 +57,7 @@
           <skipPomProjects>true</skipPomProjects>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -99,6 +72,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
@@ -116,6 +90,7 @@
           </execution>
 	</executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-scm-plugin</artifactId>
         <version>1.9</version>
@@ -148,35 +123,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.3</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
-      <version>${codehaus.jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>${codehaus.jackson.version}</version>
-    </dependency>
-  </dependencies>
 </project>
