@@ -35,6 +35,7 @@
     <module>amazonaws-utils</module>
     <module>logging-context</module>
     <module>logging-context-gelf</module>
+    <module>logging-context-json</module>
   </modules>
 
   <build>
