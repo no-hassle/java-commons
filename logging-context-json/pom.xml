@@ -38,7 +38,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>15.0</version>
+      <version>${google.guava.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>

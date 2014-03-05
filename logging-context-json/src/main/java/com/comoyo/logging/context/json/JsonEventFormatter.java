@@ -2,6 +2,8 @@ package com.comoyo.logging.context.json;
 
 import com.comoyo.commons.logging.context.LoggingContext;
 import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -66,10 +68,11 @@ public class JsonEventFormatter extends Formatter {
         dateFormatterMaster.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    // All of these are to be immutable as well.
     private final JsonGeneratorFactory jsonFactory;
     private final String hostName;
     private final String sourceName;
-    private final List<String> tags;
+    private final ImmutableList<String> tags;
 
     /**
      * Default constructor for use by java.util.logging - retrieves configuration
@@ -102,7 +105,7 @@ public class JsonEventFormatter extends Formatter {
         sourceName = getLoggerProperty(SOURCE_PROPERTY).or("java");
 
         final String[] configuredTags = getLoggerProperty(TAG_PROPERTY).or("").split(TAG_SEPARATOR_REGEX);
-        this.tags = Arrays.asList(configuredTags);
+        this.tags = ImmutableList.copyOf(configuredTags);
 
         final String prettyProperty = getLoggerProperty(PRETTY_PROPERTY).or("false");
         final HashMap<String, String> jsonConfig = new HashMap<>(1);
@@ -129,9 +132,13 @@ public class JsonEventFormatter extends Formatter {
      * to get pretty-printed JSON with whitespace and indentation.
      */
     public JsonEventFormatter(final String hostName, final String source, final List<String> tags, JsonGeneratorFactory jsonFactory) {
+        checkNotNull(hostName);
+        checkNotNull(source);
+        checkNotNull(tags);
+        checkNotNull(jsonFactory);
         this.hostName = hostName;
-        sourceName = source;
-        this.tags = tags;
+        this.sourceName = source;
+        this.tags = ImmutableList.copyOf(tags);
         this.jsonFactory = jsonFactory;
     }
 
