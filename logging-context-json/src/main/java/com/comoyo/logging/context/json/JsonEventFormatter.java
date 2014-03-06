@@ -200,6 +200,7 @@ public class JsonEventFormatter extends Formatter {
             json.writeEnd();
         }
         json.flush();
+        writer.append('\n');
         return writer.toString();
     }
 
