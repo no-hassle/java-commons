@@ -1,6 +1,7 @@
 package com.comoyo.commons.logging.context;
 
 import com.google.common.base.Optional;
+import java.io.Closeable;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ import java.util.Map;
 public class LoggingContext
 {
     public interface Scope
-        extends AutoCloseable
+        extends Closeable
     {
         /**
          * Set a [key, value] pair for this context.  If the context was
