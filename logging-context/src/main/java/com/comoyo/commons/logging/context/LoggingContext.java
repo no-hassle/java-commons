@@ -3,6 +3,28 @@ package com.comoyo.commons.logging.context;
 import com.google.common.base.Optional;
 import java.util.Map;
 
+/**
+ * A class for maintaining per-thread logging context/application
+ * state.  This state can be used to amend log messages with
+ * structured information about the entities involved in the operation
+ * triggering the log statement.  Similar to
+ * <a href="https://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/MDC.html"><code>org.apache.log4j.MDC</code></a> (log4j 1.2),
+ * <a href="https://logging.apache.org/log4j/2.x/log4j-api/apidocs/org/apache/logging/log4j/ThreadContext.html"><code>org.apache.logging.log4j.ThreadContext</code></a> (log4j 2.x) and
+ * <a href="http://www.slf4j.org/api/org/slf4j/MDC.html"><code>org.slf4j.MDC</code></a> (slf4j)
+ * while being logging framework agnostic.  ({@link LoggingContext}
+ * can be set to use different underpinning context store frameworks.
+ * It is intended to facilitate adapters for other MDC frameworks,
+ * although such adapters are not implemented at the time of writing.)
+ * </p>
+ * {@link LoggingContext} Leverages try-with-resources to enable
+ * automatic unwinding of state information. Usage example: <pre>
+ *
+ * try (final LoggingContext.Scope context = LoggingContext.openContext()) {
+ *     context.addField("key", "value");
+ *     ...
+ * }
+ * </pre>
+ */
 public class LoggingContext
 {
     public interface Scope
