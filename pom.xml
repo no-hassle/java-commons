@@ -82,7 +82,7 @@
         <configuration>
           <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${buildNum}</newVersion>
         </configuration>
-	<executions>
+        <executions>
           <execution>
             <phase>pre-site</phase>
             <id>set-version</id>
@@ -90,7 +90,7 @@
               <goal>set</goal>
             </goals>
           </execution>
-	</executions>
+        </executions>
       </plugin>
 
       <plugin>
@@ -118,8 +118,11 @@
           <show>package</show>
           <quiet>true</quiet>
           <links>
+            <link>https://javaee-spec.java.net/nonav/javadocs</link>
             <link>https://developers.google.com/protocol-buffers/docs/reference/java</link>
             <link>http://jackson.codehaus.org/1.9.9/javadoc</link>
+            <link>http://docs.guava-libraries.googlecode.com/git/javadoc</link>
+            <link>http://logging.paluch.biz/apidocs</link>
           </links>
         </configuration>
       </plugin>
