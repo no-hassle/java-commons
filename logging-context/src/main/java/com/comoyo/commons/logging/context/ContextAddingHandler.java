@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -60,14 +62,74 @@ public class ContextAddingHandler
         }
     }
 
+    private static String escapeString(final String string)
+    {
+        return string.replace("\\", "\\\\").replace("\n", "\\n").replace("\"", "\\\"");
+    }
+
+    private static LogRecord addContextToRecord(final LogRecord original)
+    {
+        final Optional<Map<String, String>> context
+            = original.getThrown() == null
+            ? LoggingContext.getContext()
+            : LoggingContext.getLastEnteredContext();
+        if (!context.isPresent()) {
+            return original;
+        }
+
+        final ResourceBundle bundle = original.getResourceBundle();
+        final String message = original.getMessage();
+        String localized = message;
+        if (message == null) {
+            localized = "";
+        }
+        else {
+            if (bundle != null) {
+                try {
+                    localized = bundle.getString(message);
+                }
+                catch (MissingResourceException e) {
+                    localized = message;
+                }
+            }
+            else {
+                localized = message;
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder(localized);
+        sb.append(" | context: {");
+        boolean first = true;
+        for (Map.Entry<String, String> entry : context.get().entrySet()) {
+            if (!first) {
+                sb.append(", ");
+            }
+            sb.append("\"")
+                .append(escapeString(entry.getKey()))
+                .append("\": \"")
+                .append(escapeString(entry.getValue()))
+                .append("\"");
+            first = false;
+        }
+        sb.append("}");
+
+        final LogRecord record = new LogRecord(original.getLevel(), sb.toString());
+        record.setLevel(original.getLevel());
+        record.setLoggerName(original.getLoggerName());
+        record.setMillis(original.getMillis());
+        record.setParameters(original.getParameters());
+        record.setSequenceNumber(original.getSequenceNumber());
+        record.setSourceClassName(original.getSourceClassName());
+        record.setSourceMethodName(original.getSourceMethodName());
+        record.setThreadID(original.getThreadID());
+        record.setThrown(original.getThrown());
+        return record;
+    }
+
     @Override
     public void publish(final LogRecord record)
     {
-        final Optional<Map<String, String>> fields
-            = record.getThrown() == null
-            ? LoggingContext.getContext()
-            : LoggingContext.getLastEnteredContext();
-        wrapped.publish(new ContextLogRecord(record, fields));
+        wrapped.publish(addContextToRecord(record));
     }
 
     @Override
