@@ -1,7 +1,5 @@
 package com.comoyo.protobuf.ws.rs.ext;
 
-import com.google.protobuf.Message;
-
 import com.comoyo.protobuf.json.PbJsonReader;
 import com.comoyo.protobuf.json.PbJsonWriter;
 import com.google.common.cache.CacheBuilder;
@@ -9,8 +7,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.BufferedWriter;
+import com.google.protobuf.Message;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,16 +36,13 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-
 /**
- * A set of reader and writer providers for protobuf-based value
- * type objects.  Includes support for serializing to and from
- * application/json, application/*+json, application/x-protobuf and
- * application/*+x-protobuf.
+ * A set of reader and writer providers for protobuf-based value type
+ * objects.  Includes support for serializing to and from {@code
+ * application/json}, {@code application/*+json}, {@code
+ * application/x-protobuf} and {@code application/*+x-protobuf}.
  *
- * @author argggh
  */
-
 public class ProtobufMessageProviders
 {
     private static final MediaType MEDIA_TYPE_APPLICATION_PB_TYPE
@@ -56,7 +52,7 @@ public class ProtobufMessageProviders
      * Fetch list of the individual provider classes.  This list is
      * suitable for inserting into a Jersey client configuration
      * object {@link com.sun.jersey.api.client.config.ClientConfig} by
-     * way of getClasses().addAll(...);
+     * way of {@code getClasses().addAll(...);}
      *
      * @return list of provider classes
      */
@@ -69,7 +65,7 @@ public class ProtobufMessageProviders
             JsonWriter.class);
     }
 
-    static boolean matchesTypeOrSuffix(MediaType input, MediaType filter)
+    private static boolean matchesTypeOrSuffix(MediaType input, MediaType filter)
     {
         if (input == null) {
             return false;
@@ -100,17 +96,26 @@ public class ProtobufMessageProviders
                             }
                         });
 
+        @Override
         public boolean isReadable(
-            Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return matchesTypeOrSuffix(mediaType, MEDIA_TYPE_APPLICATION_PB_TYPE)
                 && Message.class.isAssignableFrom(type);
         }
 
+        @Override
         public Message readFrom(
-            Class<Message> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-            throws IOException, WebApplicationException
+            final Class<Message> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType,
+            final MultivaluedMap<String, String> httpHeaders,
+            final InputStream entityStream)
+            throws IOException
         {
             try {
                 Method parseFrom = parsers.get(type);
@@ -143,23 +148,38 @@ public class ProtobufMessageProviders
     public static class NativeWriter
         implements MessageBodyWriter<Message>
     {
+        @Override
         public boolean isWriteable(
-            Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return matchesTypeOrSuffix(mediaType, MEDIA_TYPE_APPLICATION_PB_TYPE)
                 && Message.class.isAssignableFrom(type);
         }
 
+        @Override
         public long getSize(
-            Message m, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Message m,
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return m.getSerializedSize();
         }
 
+        @Override
         public void writeTo(
-            Message m, Class type, Type genericType, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap httpHeaders, OutputStream entityStream)
-            throws IOException, WebApplicationException
+            final Message m,
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType,
+            final MultivaluedMap<String, Object> httpHeaders,
+            final OutputStream entityStream)
+            throws IOException
         {
             m.writeTo(entityStream);
         }
@@ -193,7 +213,10 @@ public class ProtobufMessageProviders
                         });
         @Override
         public boolean isReadable(
-            Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return matchesTypeOrSuffix(mediaType, MediaType.APPLICATION_JSON_TYPE)
                 && GeneratedMessage.class.isAssignableFrom(type);
@@ -201,8 +224,12 @@ public class ProtobufMessageProviders
 
         @Override
         public GeneratedMessage readFrom(
-            Class<GeneratedMessage> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+            final Class<Message> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType,
+            final MultivaluedMap<String, String> httpHeaders,
+            final InputStream entityStream)
             throws IOException
         {
             try {
@@ -227,22 +254,34 @@ public class ProtobufMessageProviders
         private final PbJsonWriter jsonWriter = new PbJsonWriter();
 
         public boolean isWriteable(
-            Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return matchesTypeOrSuffix(mediaType, MediaType.APPLICATION_JSON_TYPE)
                 && Message.class.isAssignableFrom(type);
         }
 
         public long getSize(
-            Message m, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+            final Message m,
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType)
         {
             return -1;
         }
 
         public void writeTo(
-            Message m, Class type, Type genericType, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap httpHeaders, OutputStream entityStream)
-            throws IOException, WebApplicationException
+            final Message m,
+            final Class<?> type,
+            final Type genericType,
+            final Annotation[] annotations,
+            final MediaType mediaType,
+            final MultivaluedMap<String, Object> httpHeaders,
+            final OutputStream entityStream)
+            throws IOException
         {
             try {
                 BufferedWriter writer = new BufferedWriter(
