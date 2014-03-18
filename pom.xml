@@ -120,6 +120,7 @@
           <links>
             <link>https://javaee-spec.java.net/nonav/javadocs</link>
             <link>https://developers.google.com/protocol-buffers/docs/reference/java</link>
+            <link>https://jersey.java.net/nonav/apidocs/1.18/jersey</link>
             <link>http://jackson.codehaus.org/1.9.9/javadoc</link>
             <link>http://docs.guava-libraries.googlecode.com/git/javadoc</link>
             <link>http://logging.paluch.biz/apidocs</link>
