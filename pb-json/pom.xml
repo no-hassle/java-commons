@@ -71,6 +71,12 @@
       <version>2.3</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.sun.jersey.jersey-test-framework</groupId>
+      <artifactId>jersey-test-framework-inmemory</artifactId>
+      <version>1.18</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>javax.ws.rs</groupId>

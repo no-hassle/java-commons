@@ -111,6 +111,7 @@ public class PbJsonWriter
             throws IOException, WriterException
     {
         try (JsonGenerator generator = factory.createJsonGenerator(writer)) {
+            generator.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
             if (usePrettyPrinter) {
                 generator.useDefaultPrettyPrinter();
             }
