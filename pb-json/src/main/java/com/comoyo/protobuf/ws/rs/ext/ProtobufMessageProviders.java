@@ -5,9 +5,8 @@ import com.comoyo.protobuf.json.PbJsonWriter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.protobuf.GeneratedMessage;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.UninitializedMessageException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -22,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
@@ -47,6 +44,17 @@ public class ProtobufMessageProviders
 {
     private static final MediaType MEDIA_TYPE_APPLICATION_PB_TYPE
         = new MediaType("application", "x-protobuf");
+
+    private static final int MESSAGE_BUILDER_CACHE_SIZE = 100;
+    /* Maps from Message types to their static .newBuilder() Method objects. */
+    private static final LoadingCache<Class<Message>, Method> builders =
+        CacheBuilder.newBuilder()
+        .maximumSize(MESSAGE_BUILDER_CACHE_SIZE)
+        .build(new CacheLoader<Class<Message>, Method>() {
+                public Method load(Class<Message> type) throws NoSuchMethodException {
+                    return type.getMethod("newBuilder");
+                }
+            });
 
     /**
      * Fetch list of the individual provider classes.  This list is
@@ -79,23 +87,27 @@ public class ProtobufMessageProviders
         return false;
     }
 
+    private static Message.Builder getBuilderForType(Class<Message> type)
+        throws PbInstantiationException
+    {
+        try {
+            return (Message.Builder) builders.get(type).invoke(null);
+        }
+        catch (ExecutionException e) {
+            throw new PbInstantiationException(
+                "Unable to instantiate builder for " + type, e.getCause());
+        }
+        catch (IllegalAccessException | InvocationTargetException e) {
+            throw new PbInstantiationException(
+                "Unable to instantiate builder for " + type, e);
+        }
+    }
+
     @Singleton
     @Provider
     public static class NativeReader
         implements MessageBodyReader<Message>
     {
-        private static final Logger logger = Logger.getLogger(NativeReader.class.getName());
-        private static final int MESSAGE_TYPE_CACHE_SIZE = 100;
-        /** Maps from Message types to their static .parseFrom(InputStream) Method objects. */
-        private static final LoadingCache<Class<Message>, Method> parsers =
-                CacheBuilder.newBuilder()
-                        .maximumSize(MESSAGE_TYPE_CACHE_SIZE)
-                        .build(new CacheLoader<Class<Message>, Method>() {
-                            public Method load(Class<Message> type) throws NoSuchMethodException {
-                                return type.getMethod("parseFrom", InputStream.class);
-                            }
-                        });
-
         @Override
         public boolean isReadable(
             final Class<?> type,
@@ -118,27 +130,19 @@ public class ProtobufMessageProviders
             throws IOException
         {
             try {
-                Method parseFrom = parsers.get(type);
-                // Message.parseFrom is static, so invoking on it a null object is (technically) OK.
-                Message parsed = (Message) parseFrom.invoke(null, entityStream);
-                return parsed;
-            } catch (IllegalAccessException | IllegalArgumentException | SecurityException | ExecutionException e) {
-                logger.log(Level.SEVERE, "Broken code, reflection-related exception!", e);
+                final Message.Builder builder = getBuilderForType(type);
+                return builder.mergeFrom(entityStream).build();
+            }
+            catch (PbInstantiationException e) {
                 throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof InvalidProtocolBufferException) {
-                    Response failure =
-                            Response.status(Status.BAD_REQUEST)
-                                    .entity("Invalid protocol buffer received: " +
-                                                cause.getMessage())
-                                    .build();
-                    throw new WebApplicationException(failure);
-                }
-                logger.log(Level.WARNING,
-                        "Problem invoking Message.parseFrom other than " +
-                        "InvalidProtocolBufferException.", cause);
-                throw new WebApplicationException(cause);
+            }
+            catch (UninitializedMessageException e) {
+                Response failure =
+                    Response.status(Status.BAD_REQUEST)
+                    .entity("Invalid protocol buffer received: " +
+                            e.getMessage())
+                    .build();
+                throw new WebApplicationException(e, failure);
             }
         }
     }
@@ -188,29 +192,10 @@ public class ProtobufMessageProviders
     @Singleton
     @Provider
     public static class JsonReader
-        implements MessageBodyReader<GeneratedMessage>
+        implements MessageBodyReader<Message>
     {
-        private static final Logger logger = Logger.getLogger(NativeReader.class.getName());
         private final PbJsonReader jsonReader = new PbJsonReader().withAllowUnknownFields();
 
-        private static final int MESSAGE_TYPE_CACHE_SIZE = 100;
-        // Maps from protocol buffer message types to their default instances.
-        private static final LoadingCache<Class<GeneratedMessage>, GeneratedMessage> typeInstances =
-                CacheBuilder.newBuilder()
-                        .maximumSize(MESSAGE_TYPE_CACHE_SIZE)
-                        .build(new CacheLoader<Class<GeneratedMessage>, GeneratedMessage>() {
-                            @Override
-                            public GeneratedMessage load(Class<GeneratedMessage> type) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-                                // static getDefaultInstance() is not actually a method defined on
-                                // the GeneratedMessage class, but protoc is documented as
-                                // generating this method on all generated Java classes, so we
-                                // take a chance and bet on its existence.
-                                // (This is also why we're referring to the GeneratedMessage class
-                                // here in the first place,  as it's normally considered an
-                                // implementation detail of Protobufs-on-Java.)
-                                return (GeneratedMessage) type.getMethod("getDefaultInstance").invoke(null);
-                            }
-                        });
         @Override
         public boolean isReadable(
             final Class<?> type,
@@ -219,11 +204,11 @@ public class ProtobufMessageProviders
             final MediaType mediaType)
         {
             return matchesTypeOrSuffix(mediaType, MediaType.APPLICATION_JSON_TYPE)
-                && GeneratedMessage.class.isAssignableFrom(type);
+                && Message.class.isAssignableFrom(type);
         }
 
         @Override
-        public GeneratedMessage readFrom(
+        public Message readFrom(
             final Class<Message> type,
             final Type genericType,
             final Annotation[] annotations,
@@ -233,14 +218,18 @@ public class ProtobufMessageProviders
             throws IOException
         {
             try {
-                GeneratedMessage defaultMessageInstance = typeInstances.get(type);
-                return jsonReader.parse(defaultMessageInstance, entityStream);
-            } catch (PbJsonReader.ReaderException ex) {
-                logger.log(Level.INFO, "Unable to deserialize JSON to protobuffer", ex);
-                throw new IOException("Unable to deserialize JSON to protobuffer: " + ex.getMessage(), ex);
-            } catch (ExecutionException ex) {
-                logger.log(Level.SEVERE, "Unable to instantiate target protobuffer class", ex);
-                throw new IOException("Unable to instantiate target protobuffer class", ex);
+                final Message.Builder builder = getBuilderForType(type);
+                return jsonReader.parse(builder, entityStream);
+            }
+            catch (PbInstantiationException e) {
+                throw new RuntimeException(e);
+            }
+            catch (PbJsonReader.ReaderException e) {
+                Response failure =
+                    Response.status(Status.BAD_REQUEST)
+                    .entity("Unable to deserialize JSON to protobuffer: " + e.getMessage())
+                    .build();
+                throw new WebApplicationException(e, failure);
             }
         }
     }
@@ -293,5 +282,12 @@ public class ProtobufMessageProviders
                 throw new IOException("Unable to write protocol buffer as JSON to OutputStream", ex);
             }
         }
+    }
+
+    public static class PbInstantiationException extends Exception
+    {
+        public PbInstantiationException(String message) { super(message); }
+        public PbInstantiationException(String message, Throwable cause) { super(message, cause); }
+        public PbInstantiationException(Throwable cause) { super(cause); }
     }
 }
