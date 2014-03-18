@@ -143,6 +143,65 @@ public class PbJsonReader
         }
     }
 
+    /**
+     * Parse a JSON document given as a {@link String}.
+     *
+     * @param builder {@link com.google.protobuf.Message.Builder}
+     * instance for object type to marshall to.
+     * @param json JSON document.
+     */
+    public Message parse(Message.Builder builder, String json)
+        throws ReaderException
+    {
+        try {
+            JsonParser parser = factory.createJsonParser(json);
+            return parse(builder, parser);
+        }
+        catch (IOException e) {
+            throw new InputException(e);
+        }
+    }
+
+    /**
+     * Parse a JSON document given as an {@link InputStream}.  See
+     * {@link #parse parse(Message.Builder, String)}.
+     *
+     * @param builder {@link com.google.protobuf.Message.Builder}
+     * instance for object type to marshall to.
+     * @param stream JSON document.
+     */
+    public Message parse(Message.Builder builder, InputStream stream)
+        throws ReaderException
+    {
+        try {
+            JsonParser parser = factory.createJsonParser(stream);
+            return parse(builder, parser);
+        }
+        catch (IOException e) {
+            throw new InputException(e);
+        }
+    }
+
+    /**
+     * Parse a JSON document given as a {@link File}.  See {@link
+     * #parse parse(Message.Builder, String)}.
+     *
+     * @param builder {@link com.google.protobuf.Message.Builder}
+     * instance for object type to marshall to.
+     * @param file JSON document.
+     */
+    public Message parse(Message.Builder builder, File file)
+        throws ReaderException
+    {
+        try {
+            JsonParser parser = factory.createJsonParser(file);
+            return parse(builder, parser);
+        }
+        catch (IOException e) {
+            throw new InputException(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends Message> T parse(T typeInstance, JsonParser parser)
         throws ReaderException
@@ -168,6 +227,26 @@ public class PbJsonReader
                         + result.getClass());
             }
             return (T) result;
+        }
+        catch (IOException e) {
+            throw new InputException(e);
+        }
+    }
+
+    private Message parse(Message.Builder builder, JsonParser parser)
+        throws ReaderException
+    {
+        parser.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
+        try {
+            JsonToken token = parser.nextToken();
+            if (token == null) {
+                return null;
+            }
+            if (!token.equals(JsonToken.START_OBJECT)) {
+                throw new ReaderException(
+                    "JSON document did not start with opening brace");
+            }
+            return parseObject(builder, parser).build();
         }
         catch (IOException e) {
             throw new InputException(e);
