@@ -1,0 +1,8 @@
+biz.paluch.logging
+biz.paluch.logging.gelf
+biz.paluch.logging.gelf.intern
+biz.paluch.logging.gelf.jboss7
+biz.paluch.logging.gelf.jul
+biz.paluch.logging.gelf.log4j
+biz.paluch.logging.gelf.log4j2
+biz.paluch.logging.gelf.logback

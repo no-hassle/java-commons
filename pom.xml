@@ -117,14 +117,32 @@
         <configuration>
           <show>package</show>
           <quiet>true</quiet>
-          <links>
-            <link>https://javaee-spec.java.net/nonav/javadocs</link>
-            <link>https://developers.google.com/protocol-buffers/docs/reference/java</link>
-            <link>https://jersey.java.net/nonav/apidocs/1.18/jersey</link>
-            <link>http://jackson.codehaus.org/1.9.9/javadoc</link>
-            <link>http://docs.guava-libraries.googlecode.com/git/javadoc</link>
-            <link>http://logging.paluch.biz/apidocs</link>
-          </links>
+          <offlineLinks>
+            <offlineLink>
+              <url>https://javaee-spec.java.net/nonav/javadocs</url>
+              <location>../../../javadoc/javaee-spec.java.net</location>
+            </offlineLink>
+            <offlineLink>
+              <url>https://developers.google.com/protocol-buffers/docs/reference/java</url>
+              <location>../../../javadoc/developers.google.com/protocol-buffers</location>
+            </offlineLink>
+            <offlineLink>
+              <url>https://jersey.java.net/nonav/apidocs/1.18/jersey</url>
+              <location>../../../javadoc/jersey.java.net</location>
+            </offlineLink>
+            <offlineLink>
+              <url>http://jackson.codehaus.org/1.9.9/javadoc</url>
+              <location>../../../javadoc/jackson.codehaus.org</location>
+            </offlineLink>
+            <offlineLink>
+              <url>http://docs.guava-libraries.googlecode.com/git/javadoc</url>
+              <location>../../../javadoc/docs.guava-libraries.googlecode.com</location>
+            </offlineLink>
+            <offlineLink>
+              <url>http://logging.paluch.biz/apidocs</url>
+              <location>../../../javadoc/logging.paluch.biz</location>
+            </offlineLink>
+          </offlineLinks>
         </configuration>
       </plugin>
     </plugins>
