@@ -9,24 +9,20 @@ import org.codehaus.jackson.map.ser.std.SerializerBase;
 import java.io.IOException;
 
 /**
- * Wire up Jackson to do json serialization of {@link Message} derived
- * protobuf value objects.
+ * Json serializer for {@link Message} derived protobuf value objects
+ * to support {@link org.codehaus.jackson.annotate.JsonUnwrapped}
+ * annotation.
  *
  */
-public class ProtobufSerializer
+public class UnwrappingProtobufSerializer
     extends SerializerBase<Message>
 {
     private final PbJsonWriter writer;
 
-    public ProtobufSerializer(PbJsonWriter writer)
+    public UnwrappingProtobufSerializer(PbJsonWriter writer)
     {
         super(Message.class);
         this.writer = writer;
-    }
-
-    public ProtobufSerializer()
-    {
-        this(new PbJsonWriter());
     }
 
     @Override
@@ -37,7 +33,7 @@ public class ProtobufSerializer
             throws IOException
     {
         try {
-            writer.generateObject(value, jgen);
+            writer.generateUnwrappedObject(value, jgen);
         }
         catch (PbJsonWriter.WriterException e) {
             throw new IOException(e);
@@ -45,8 +41,14 @@ public class ProtobufSerializer
     }
 
     @Override
+    public boolean isUnwrappingSerializer()
+    {
+        return true;
+    }
+
+    @Override
     public JsonSerializer<Message> unwrappingSerializer()
     {
-        return new UnwrappingProtobufSerializer(writer);
+        return this;
     }
 }

@@ -125,8 +125,15 @@ public class PbJsonWriter
     protected void generateObject(Message message, JsonGenerator generator)
         throws WriterException, IOException
     {
-        final Descriptors.Descriptor descriptor = message.getDescriptorForType();
         generator.writeStartObject();
+        generateUnwrappedObject(message, generator);
+        generator.writeEndObject();
+    }
+
+    protected void generateUnwrappedObject(Message message, JsonGenerator generator)
+        throws WriterException, IOException
+    {
+        final Descriptors.Descriptor descriptor = message.getDescriptorForType();
         for (Descriptors.FieldDescriptor field : descriptor.getFields()) {
             if (field.isRepeated()) {
                 final int length = message.getRepeatedFieldCount(field);
@@ -148,7 +155,6 @@ public class PbJsonWriter
                 generateValue(field, message.getField(field), generator);
             }
         }
-        generator.writeEndObject();
     }
 
     private void generateValue(
