@@ -7,7 +7,7 @@
     <artifactId>commons</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>com.comoyo</groupId>
+  <groupId>com.comoyo.commons</groupId>
   <artifactId>logging-context-json</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>logging-context-json - Logging with context to json-event logs for logstash</name>
