@@ -1,7 +1,5 @@
 package com.comoyo.commons.logging.context;
 
-import com.google.common.base.Optional;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -69,11 +67,11 @@ public class ContextAddingHandler
 
     private static LogRecord addContextToRecord(final LogRecord original)
     {
-        final Optional<Map<String, String>> context
+        final Map<String, String> context
             = original.getThrown() == null
             ? LoggingContext.getContext()
             : LoggingContext.getLastEnteredContext();
-        if (!context.isPresent()) {
+        if (context == null) {
             return original;
         }
 
@@ -100,7 +98,7 @@ public class ContextAddingHandler
         final StringBuilder sb = new StringBuilder(localized);
         sb.append(" | context: {");
         boolean first = true;
-        for (Map.Entry<String, String> entry : context.get().entrySet()) {
+        for (Map.Entry<String, String> entry : context.entrySet()) {
             if (!first) {
                 sb.append(", ");
             }

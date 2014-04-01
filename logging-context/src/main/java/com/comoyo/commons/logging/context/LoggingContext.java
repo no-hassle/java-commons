@@ -1,6 +1,5 @@
 package com.comoyo.commons.logging.context;
 
-import com.google.common.base.Optional;
 import java.io.Closeable;
 import java.util.Map;
 
@@ -96,11 +95,10 @@ public class LoggingContext
     /**
      * Get the populated fields for the current context.  If no
      * context has been established using {@link #openContext},
-     * returns absent value.
-     * @return optionally, map of [key, value] pairs for the current
-     * context.
+     * returns {@code null}.
+     * @return map of [key, value] pairs for the current context.
      */
-    public static Optional<Map<String, String>> getContext()
+    public static Map<String, String> getContext()
     {
         return factory.getContext();
     }
@@ -108,15 +106,14 @@ public class LoggingContext
     /**
      * Get the populated fields for the last opened context.  If no
      * context has been established using {@link #openContext},
-     * returns absent value.  This differs from {@link #getContext} in
+     * returns {@code null}.  This differs from {@link #getContext} in
      * that it may return context for a scope that has been abandoned.
      * This function is primarily useful when logging an event at a
      * different level then where it occurred, e.g an exception.
      *
-     * @return optionally, map of [key, value] pairs for the last
-     * entered context.
+     * @return map of [key, value] pairs for the last entered context.
      */
-    public static Optional<Map<String, String>> getLastEnteredContext()
+    public static Map<String, String> getLastEnteredContext()
     {
         return factory.getLastEnteredContext();
     }
