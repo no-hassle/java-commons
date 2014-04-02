@@ -1,9 +1,6 @@
 package com.comoyo.logging.context.json;
 
 import com.comoyo.commons.logging.context.LoggingContext;
-import com.google.common.base.Optional;
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.ImmutableList;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -11,6 +8,7 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +70,7 @@ public class JsonEventFormatter extends Formatter {
     private final JsonGeneratorFactory jsonFactory;
     private final String hostName;
     private final String sourceName;
-    private final ImmutableList<String> tags;
+    private final List<String> tags;
 
     /**
      * Default constructor for use by java.util.logging - retrieves configuration
@@ -89,25 +87,20 @@ public class JsonEventFormatter extends Formatter {
      *      useful for debugging, not recommended for machine consumption.
      */
     public JsonEventFormatter() {
-        Optional<String> sourceHostProperty = getLoggerProperty(SOURCEHOST_PROPERTY);
-        if (sourceHostProperty.isPresent()) {
-            hostName = sourceHostProperty.get();
-        } else {
-            String foundHostName;
-            try {
-                foundHostName = InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException ex) {
-                foundHostName = "unknown-host";
-            }
-            hostName = foundHostName;
+        String defaultHostName;
+        try {
+            defaultHostName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ex) {
+            defaultHostName = "unknown-host";
         }
+        hostName = getLoggerPropertyOrDefault(SOURCEHOST_PROPERTY, defaultHostName);
 
-        sourceName = getLoggerProperty(SOURCE_PROPERTY).or("java");
+        sourceName = getLoggerPropertyOrDefault(SOURCE_PROPERTY, "java");
 
-        final String[] configuredTags = getLoggerProperty(TAG_PROPERTY).or("").split(TAG_SEPARATOR_REGEX);
-        this.tags = ImmutableList.copyOf(configuredTags);
+        final String[] configuredTags = getLoggerPropertyOrDefault(TAG_PROPERTY, "").split(TAG_SEPARATOR_REGEX);
+        this.tags = Collections.unmodifiableList(Arrays.asList(configuredTags));
 
-        final String prettyProperty = getLoggerProperty(PRETTY_PROPERTY).or("false");
+        final String prettyProperty = getLoggerPropertyOrDefault(PRETTY_PROPERTY, "false");
         final HashMap<String, String> jsonConfig = new HashMap<>(1);
         if ("true".equalsIgnoreCase(prettyProperty) || "yes".equalsIgnoreCase(prettyProperty)) {
             jsonConfig.put(JsonGenerator.PRETTY_PRINTING, prettyProperty);
@@ -132,13 +125,13 @@ public class JsonEventFormatter extends Formatter {
      * to get pretty-printed JSON with whitespace and indentation.
      */
     public JsonEventFormatter(final String hostName, final String source, final List<String> tags, JsonGeneratorFactory jsonFactory) {
-        checkNotNull(hostName);
-        checkNotNull(source);
-        checkNotNull(tags);
-        checkNotNull(jsonFactory);
+        assert hostName != null;
+        assert source != null;
+        assert tags != null;
+        assert jsonFactory != null;
         this.hostName = hostName;
         this.sourceName = source;
-        this.tags = ImmutableList.copyOf(tags);
+        this.tags = Collections.unmodifiableList(new ArrayList(tags));
         this.jsonFactory = jsonFactory;
     }
 
@@ -183,19 +176,19 @@ public class JsonEventFormatter extends Formatter {
                 json.writeEnd();
             }
 
-            final Optional<Throwable> thrown = Optional.fromNullable(record.getThrown());
-            if (thrown.isPresent()) {
+            final Throwable thrown = record.getThrown();
+            if (thrown != null) {
                 json.writeStartObject(JSON_KEY_EXCEPTION);
                 boolean withDescription = true;
-                writeThrowableToJson(json, thrown.get(), withDescription);
+                writeThrowableToJson(json, thrown, withDescription);
                 json.writeEnd();
             }
 
-            final Optional<Map<String, String> > context = thrown.isPresent() ?
+            final Map<String, String> context = thrown != null ?
                     LoggingContext.getLastEnteredContext() :
                     LoggingContext.getContext();
-            if (context.isPresent()) {
-                writeContextToJson(json, context.get());
+            if (context != null) {
+                writeContextToJson(json, context);
             }
             json.writeEnd();
         }
@@ -239,14 +232,14 @@ public class JsonEventFormatter extends Formatter {
      */
     private static void writeThrowableToJson(
             final JsonGenerator json, final Throwable thrown, boolean withDescription) {
-        final Optional<String> exceptionClass = Optional.fromNullable(thrown.getClass().getCanonicalName());
-        final Optional<String> exceptionMessage = Optional.fromNullable(thrown.getMessage());
+        final String exceptionClass = thrown.getClass().getCanonicalName();
+        final String exceptionMessage = thrown.getMessage();
 
-        if (exceptionClass.isPresent()) {
-            json.write(JSON_KEY_EXCEPTION_CLASS, exceptionClass.get());
+        if (exceptionClass != null) {
+            json.write(JSON_KEY_EXCEPTION_CLASS, exceptionClass);
         }
-        if (exceptionMessage.isPresent()) {
-            json.write(JSON_KEY_EXCEPTION_MESSAGE, exceptionMessage.get());
+        if (exceptionMessage != null) {
+            json.write(JSON_KEY_EXCEPTION_MESSAGE, exceptionMessage);
         }
         if (withDescription) {
             final StringWriter stackWriter = new StringWriter();
@@ -278,8 +271,9 @@ public class JsonEventFormatter extends Formatter {
         }
     }
 
-    private static Optional<String> getLoggerProperty(final String propertyName) {
-        return Optional.fromNullable(LogManager.getLogManager().getProperty(PROPERTY_PREFIX + propertyName));
+    private static String getLoggerPropertyOrDefault(final String propertyName, final String defaultValue) {
+        final String foundProperty = LogManager.getLogManager().getProperty(PROPERTY_PREFIX + propertyName);
+        return foundProperty != null ? foundProperty : defaultValue;
     }
 
     // Package private accessors for test usage.

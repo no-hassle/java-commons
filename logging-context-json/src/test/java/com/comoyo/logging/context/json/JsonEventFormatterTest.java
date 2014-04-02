@@ -1,11 +1,11 @@
 package com.comoyo.logging.context.json;
 
 import com.comoyo.commons.logging.context.LoggingContext;
-import com.google.common.collect.ImmutableMap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -35,8 +35,10 @@ public class JsonEventFormatterTest extends TestCase {
     static final List<String> TEST_TAGS = Arrays.asList(new String[] {"tag1", "tag2"});
 
     JsonReaderFactory jsonReaderFactory = Json.createReaderFactory(null);
-    JsonGeneratorFactory prettyJsonFactory = Json.createGeneratorFactory(
-            ImmutableMap.of(JsonGenerator.PRETTY_PRINTING, "true"));
+    HashMap<String, String> jsonGeneratorOptions = new HashMap<String, String>() {{
+        put(JsonGenerator.PRETTY_PRINTING, "true");
+    }};
+    JsonGeneratorFactory prettyJsonFactory = Json.createGeneratorFactory(jsonGeneratorOptions);
 
     /**
      * Base case test - send in a simple log message, see if JSON with required fields comes out.
