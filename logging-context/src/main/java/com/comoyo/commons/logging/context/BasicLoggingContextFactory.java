@@ -1,6 +1,5 @@
 package com.comoyo.commons.logging.context;
 
-import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -69,13 +68,13 @@ public class BasicLoggingContextFactory
         return new Scope(currentFields, currentFields);
     }
 
-    public Optional<Map<String, String>> getContext()
+    public Map<String, String> getContext()
     {
-        return Optional.<Map<String, String>>fromNullable(currentContext.get());
+        return currentContext.get();
     }
 
-    public Optional<Map<String, String>> getLastEnteredContext()
+    public Map<String, String> getLastEnteredContext()
     {
-        return Optional.<Map<String, String>>fromNullable(lastEnteredContext.get());
+        return lastEnteredContext.get();
     }
 }

@@ -3,7 +3,6 @@ package com.comoyo.commons.logging.context.gelf;
 import biz.paluch.logging.gelf.jul.GelfLogHandler;
 import biz.paluch.logging.gelf.intern.GelfMessage;
 import com.comoyo.commons.logging.context.LoggingContext;
-import com.google.common.base.Optional;
 
 import java.util.Map;
 import java.util.logging.LogRecord;
@@ -19,13 +18,13 @@ public class ContextAwareGelfLogHandler
     @Override
     protected GelfMessage createGelfMessage(final LogRecord record) {
         final GelfMessage message = super.createGelfMessage(record);
-        final Optional<Map<String, String>> ctxFields
+        final Map<String, String> ctxFields
             = record.getThrown() == null
             ? LoggingContext.getContext()
             : LoggingContext.getLastEnteredContext();
-        if (ctxFields.isPresent()) {
+        if (ctxFields != null) {
             final Map<String, String> logFields = message.getAdditonalFields();
-            for (Map.Entry<String, String> entry : ctxFields.get().entrySet()) {
+            for (Map.Entry<String, String> entry : ctxFields.entrySet()) {
                 logFields.put("context." + entry.getKey(), entry.getValue());
             }
         }

@@ -1,7 +1,5 @@
 package com.comoyo.commons.logging.context;
 
-import com.google.common.base.Optional;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -14,17 +12,17 @@ public class LoggingContextUnitTest
     @Test
     public void testNoContext()
     {
-        Optional<Map<String, String>> fields = LoggingContext.getContext();
-        assertFalse("Unset context was not absent", fields.isPresent());
+        Map<String, String> fields = LoggingContext.getContext();
+        assertNull("Unset context was not absent", fields);
     }
 
     @Test
     public void testUpdateMissingContext()
     {
         try (final LoggingContext.Scope context = LoggingContext.currentContext()) {
-            assertNotNull("Established context was null", LoggingContext.getContext());
+            assertNull("Unestablished context was not null", LoggingContext.getContext());
             context.addField("key", "value");
-            assertFalse("Unopened context was present", LoggingContext.getContext().isPresent());
+            assertNull("Unopened context was present", LoggingContext.getContext());
         }
     }
 
@@ -34,11 +32,11 @@ public class LoggingContextUnitTest
         try (final LoggingContext.Scope context = LoggingContext.openContext()) {
             assertNotNull("Established context was null", LoggingContext.getContext());
             context.addField("key", "value");
-            final Optional<Map<String, String>> fields = LoggingContext.getContext();
-            assertTrue("No context present", fields.isPresent());
-            assertEquals("Context did not contain established key", "value", fields.get().get("key"));
+            final Map<String, String> fields = LoggingContext.getContext();
+            assertNotNull("No context present", fields);
+            assertEquals("Context did not contain established key", "value", fields.get("key"));
         }
-        assertFalse("Abandoned context was not absent", LoggingContext.getContext().isPresent());
+        assertNull("Abandoned context was not absent", LoggingContext.getContext());
     }
 
     @Test
@@ -48,26 +46,26 @@ public class LoggingContextUnitTest
             context1.addField("key1", "value1");
             try (final LoggingContext.Scope context2 = LoggingContext.openContext()) {
                 context2.addField("key2", "value2");
-                final Optional<Map<String, String>> fields = LoggingContext.getContext();
-                assertTrue("No context present", fields.isPresent());
-                assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-                assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+                final Map<String, String> fields = LoggingContext.getContext();
+                assertNotNull("No context present", fields);
+                assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+                assertEquals("Context did not contain established key", "value2", fields.get("key2"));
             }
-            final Optional<Map<String, String>> fields = LoggingContext.getContext();
-            assertTrue("No context present", fields.isPresent());
-            assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-            assertEquals("Context contained key from abandoned frame", null, fields.get().get("key2"));
+            final Map<String, String> fields = LoggingContext.getContext();
+            assertNotNull("No context present", fields);
+            assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+            assertEquals("Context contained key from abandoned frame", null, fields.get("key2"));
 
-            final Optional<Map<String, String>> entered = LoggingContext.getLastEnteredContext();
-            assertTrue("No last entered context present", entered.isPresent());
+            final Map<String, String> entered = LoggingContext.getLastEnteredContext();
+            assertNotNull("No last entered context present", entered);
             assertEquals("Last entered context did not contain established key",
-                         "value1", entered.get().get("key1"));
+                         "value1", entered.get("key1"));
             assertEquals("Last entered context did not contain established key",
-                         "value2", entered.get().get("key2"));
+                         "value2", entered.get("key2"));
         }
-        assertFalse("Abandoned context was not absent", LoggingContext.getContext().isPresent());
-        assertFalse("Abandoned last entered context was not absent",
-                    LoggingContext.getLastEnteredContext().isPresent());
+        assertNull("Abandoned context was not absent", LoggingContext.getContext());
+        assertNull("Abandoned last entered context was not absent",
+                   LoggingContext.getLastEnteredContext());
     }
 
     @Test
@@ -77,17 +75,17 @@ public class LoggingContextUnitTest
             context1.addField("key1", "value1");
             try (final LoggingContext.Scope context2 = LoggingContext.currentContext()) {
                 context2.addField("key2", "value2");
-                final Optional<Map<String, String>> fields = LoggingContext.getContext();
-                assertTrue("No context present", fields.isPresent());
-                assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-                assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+                final Map<String, String> fields = LoggingContext.getContext();
+                assertNotNull("No context present", fields);
+                assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+                assertEquals("Context did not contain established key", "value2", fields.get("key2"));
             }
-            final Optional<Map<String, String>> fields = LoggingContext.getContext();
-            assertTrue("No context present", fields.isPresent());
-            assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-            assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+            final Map<String, String> fields = LoggingContext.getContext();
+            assertNotNull("No context present", fields);
+            assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+            assertEquals("Context did not contain established key", "value2", fields.get("key2"));
         }
-        assertFalse("Abandoned context was not absent", LoggingContext.getContext().isPresent());
+        assertNull("Abandoned context was not absent", LoggingContext.getContext());
     }
 
     @Test
@@ -101,11 +99,11 @@ public class LoggingContextUnitTest
                 public AssertionError call()
                 {
                     context.addField("key2", "value2");
-                    final Optional<Map<String, String>> fields = LoggingContext.getContext();
+                    final Map<String, String> fields = LoggingContext.getContext();
                     try {
-                        assertTrue("No context present", fields.isPresent());
-                        assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-                        assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+                        assertNotNull("No context present", fields);
+                        assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+                        assertEquals("Context did not contain established key", "value2", fields.get("key2"));
                     }
                     catch (final AssertionError e) {
                         return e;
@@ -122,12 +120,12 @@ public class LoggingContextUnitTest
                 throw result;
             }
 
-            final Optional<Map<String, String>> fields = LoggingContext.getContext();
-            assertTrue("No context present", fields.isPresent());
-            assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-            assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+            final Map<String, String> fields = LoggingContext.getContext();
+            assertNotNull("No context present", fields);
+            assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+            assertEquals("Context did not contain established key", "value2", fields.get("key2"));
         }
-        assertFalse("Abandoned context was not absent", LoggingContext.getContext().isPresent());
+        assertNull("Abandoned context was not absent", LoggingContext.getContext());
     }
 
     @Test
@@ -142,10 +140,10 @@ public class LoggingContextUnitTest
                 {
                     try (final LoggingContext.Scope context2 = LoggingContext.openContext()) {
                         context2.addField("key2", "value2");
-                        final Optional<Map<String, String>> fields = LoggingContext.getContext();
-                        assertTrue("No context present", fields.isPresent());
-                        assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-                        assertEquals("Context did not contain established key", "value2", fields.get().get("key2"));
+                        final Map<String, String> fields = LoggingContext.getContext();
+                        assertNotNull("No context present", fields);
+                        assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+                        assertEquals("Context did not contain established key", "value2", fields.get("key2"));
                     }
                     catch (final AssertionError e) {
                         return e;
@@ -162,11 +160,11 @@ public class LoggingContextUnitTest
                 throw result;
             }
 
-            final Optional<Map<String, String>> fields = LoggingContext.getContext();
-            assertTrue("No context present", fields.isPresent());
-            assertEquals("Context did not contain established key", "value1", fields.get().get("key1"));
-            assertEquals("Context contained key from abandoned frame", null, fields.get().get("key2"));
+            final Map<String, String> fields = LoggingContext.getContext();
+            assertNotNull("No context present", fields);
+            assertEquals("Context did not contain established key", "value1", fields.get("key1"));
+            assertEquals("Context contained key from abandoned frame", null, fields.get("key2"));
         }
-        assertFalse("Abandoned context was not absent", LoggingContext.getContext().isPresent());
+        assertNull("Abandoned context was not absent", LoggingContext.getContext());
     }
 }

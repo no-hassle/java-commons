@@ -1,6 +1,5 @@
 package com.comoyo.commons.logging.context;
 
-import com.google.common.base.Optional;
 import java.util.Map;
 
 public interface LoggingContextFactory
@@ -18,10 +17,10 @@ public interface LoggingContextFactory
     /**
      * See {@link LoggingContext#getContext}
      */
-    Optional<Map<String, String>> getContext();
+    Map<String, String> getContext();
 
     /**
      * See {@link LoggingContext#getLastEnteredContext}
      */
-    Optional<Map<String, String>> getLastEnteredContext();
+    Map<String, String> getLastEnteredContext();
 }
