@@ -97,8 +97,13 @@ public class JsonEventFormatter extends Formatter {
 
         sourceName = getLoggerPropertyOrDefault(SOURCE_PROPERTY, "java");
 
-        final String[] configuredTags = getLoggerPropertyOrDefault(TAG_PROPERTY, "").split(TAG_SEPARATOR_REGEX);
-        this.tags = Collections.unmodifiableList(Arrays.asList(configuredTags));
+        final String configuredTagsString = getLoggerPropertyOrDefault(TAG_PROPERTY, "");
+        if (!"".equals(configuredTagsString)) {
+            final String[] configuredTags = configuredTagsString.split(TAG_SEPARATOR_REGEX);
+            this.tags = Collections.unmodifiableList(Arrays.asList(configuredTags));
+        } else {
+            this.tags= Collections.emptyList();
+        }
 
         final String prettyProperty = getLoggerPropertyOrDefault(PRETTY_PROPERTY, "false");
         final HashMap<String, String> jsonConfig = new HashMap<>(1);
