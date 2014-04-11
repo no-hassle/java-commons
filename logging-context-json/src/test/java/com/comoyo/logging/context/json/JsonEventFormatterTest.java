@@ -32,6 +32,7 @@ public class JsonEventFormatterTest extends TestCase {
     static final String TEST_SOURCE = "testSource";
     static final String TEST_HOSTNAME = "testhostname";
     static final String TEST_LOG_MESSAGE = "This is a log message";
+    static final String TEST_THREAD_NAME = "test-thread";
     static final List<String> TEST_TAGS = Arrays.asList(new String[] {"tag1", "tag2"});
 
     JsonReaderFactory jsonReaderFactory = Json.createReaderFactory(null);
@@ -184,6 +185,31 @@ public class JsonEventFormatterTest extends TestCase {
         // If we get this far, we're probably out of the woods, reset the logging subsystem.
         logManager.reset();
         logManager.readConfiguration();
+    }
+
+    private class LoggingThread extends Thread {
+        private JsonObject entry;
+        public LoggingThread(String name)
+        {
+            super(name);
+        }
+        @Override
+        public void run() {
+            entry = logToJson(new LogRecord(Level.INFO, TEST_LOG_MESSAGE));
+        }
+        public JsonObject getLog()
+        {
+            return entry;
+        }
+    }
+
+    public void testThreads() throws Exception {
+        final LoggingThread thread = new LoggingThread(TEST_THREAD_NAME);
+        thread.start();
+        thread.join();
+        final JsonObject resultObject = thread.getLog();
+        assertTrue(resultObject.containsKey(JsonEventFormatter.JSON_KEY_THREAD_NAME));
+        assertEquals(TEST_THREAD_NAME, resultObject.getString(JsonEventFormatter.JSON_KEY_THREAD_NAME));
     }
 
     // Laziness methods.

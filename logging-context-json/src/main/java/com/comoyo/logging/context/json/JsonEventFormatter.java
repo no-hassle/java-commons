@@ -13,7 +13,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -51,6 +53,7 @@ public class JsonEventFormatter extends Formatter {
     public static final String JSON_KEY_EXCEPTION_MESSAGE = "exception_message";
     public static final String JSON_KEY_EXCEPTION_STACKTRACE = "stacktrace";
     public static final String JSON_KEY_THREAD_ID = "thread_id";
+    public static final String JSON_KEY_THREAD_NAME = "thread_name";
 
     static final int LOGSTASH_JSON_VERSION = 1;
     static final String ISO8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
@@ -72,6 +75,9 @@ public class JsonEventFormatter extends Formatter {
     private final String hostName;
     private final String sourceName;
     private final List<String> tags;
+
+    // Immutable and replaceable
+    private volatile SortedMap<Long, String> threadNames;
 
     /**
      * Default constructor for use by java.util.logging - retrieves configuration
@@ -112,6 +118,7 @@ public class JsonEventFormatter extends Formatter {
             jsonConfig.put(JsonGenerator.PRETTY_PRINTING, prettyProperty);
         }
         jsonFactory = Json.createGeneratorFactory(jsonConfig);
+        threadNames = Collections.unmodifiableSortedMap(new TreeMap<Long, String>());
     }
 
     /**
@@ -139,6 +146,7 @@ public class JsonEventFormatter extends Formatter {
         this.sourceName = source;
         this.tags = Collections.unmodifiableList(new ArrayList(tags));
         this.jsonFactory = jsonFactory;
+        threadNames = Collections.unmodifiableSortedMap(new TreeMap<Long, String>());
     }
 
     /**
@@ -165,6 +173,10 @@ public class JsonEventFormatter extends Formatter {
                     .write(JSON_KEY_MESSAGE, formattedMessage)
                     .write(JSON_KEY_THREAD_ID, record.getThreadID());
 
+            final String threadName = getThreadName(record.getThreadID());
+            if (null != threadName) {
+                json.write(JSON_KEY_THREAD_NAME, threadName);
+            }
             if (null != record.getLoggerName()) {
                 json.write(JSON_KEY_LOGGER_NAME, record.getLoggerName());
             }
@@ -281,6 +293,46 @@ public class JsonEventFormatter extends Formatter {
     private static String getLoggerPropertyOrDefault(final String propertyName, final String defaultValue) {
         final String foundProperty = LogManager.getLogManager().getProperty(PROPERTY_PREFIX + propertyName);
         return foundProperty != null ? foundProperty : defaultValue;
+    }
+
+    /**
+     * Best-effort attempt at resolving a thread id to a thread name.
+     * Will return null if the thread id cannot be resolved, e.g if
+     * the thread in question has already exited.  May potentially
+     * return misleading data if thread ids are reused.  This is not
+     * guaranteed not to happen, but the Java 7 Thread implementation
+     * in practice obeys this constraint.
+     *
+     * @param tid A thread id
+     * @return The corresponding name for the thread in question
+     */
+    private String getThreadName(long tid)
+    {
+        if (!threadNames.containsKey(tid)) {
+            updateThreadNames();
+        }
+        return threadNames.get(tid);
+    }
+
+    private synchronized void updateThreadNames()
+    {
+        ThreadGroup root = Thread.currentThread().getThreadGroup();
+        while (true) {
+            final ThreadGroup parent = root.getParent();
+            if (null == parent) {
+                break;
+            }
+            root = parent;
+        }
+        final int active = root.activeCount();
+        final Thread[] threads = new Thread[active + 100];
+        final int enumerated = root.enumerate(threads);
+        final TreeMap<Long, String> names = new TreeMap<>();
+        for (int i = 0; i < enumerated; i++) {
+            final Thread thread = threads[i];
+            names.put(thread.getId(), thread.getName());
+        }
+        threadNames = Collections.unmodifiableSortedMap(names);
     }
 
     // Package private accessors for test usage.
