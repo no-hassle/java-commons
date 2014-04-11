@@ -50,6 +50,7 @@ public class JsonEventFormatter extends Formatter {
     public static final String JSON_KEY_EXCEPTION_CLASS = "exception_class";
     public static final String JSON_KEY_EXCEPTION_MESSAGE = "exception_message";
     public static final String JSON_KEY_EXCEPTION_STACKTRACE = "stacktrace";
+    public static final String JSON_KEY_THREAD_ID = "thread_id";
 
     static final int LOGSTASH_JSON_VERSION = 1;
     static final String ISO8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
@@ -161,7 +162,8 @@ public class JsonEventFormatter extends Formatter {
                     .write(JSON_KEY_SOURCE_HOST, hostName)
                     .write(JSON_KEY_SOURCE, sourceName)
                     .write(JSON_KEY_LEVEL, record.getLevel().getName())
-                    .write(JSON_KEY_MESSAGE, formattedMessage);
+                    .write(JSON_KEY_MESSAGE, formattedMessage)
+                    .write(JSON_KEY_THREAD_ID, record.getThreadID());
 
             if (null != record.getLoggerName()) {
                 json.write(JSON_KEY_LOGGER_NAME, record.getLoggerName());
