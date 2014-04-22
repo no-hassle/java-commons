@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -78,6 +79,7 @@ public class JsonEventFormatter extends Formatter {
 
     // Immutable and replaceable
     private volatile SortedMap<Long, String> threadNames;
+    private final Semaphore threadNamesLock;
 
     /**
      * Default constructor for use by java.util.logging - retrieves configuration
@@ -93,32 +95,43 @@ public class JsonEventFormatter extends Formatter {
      *      output JSON formatted with indentation and line breaks for human consumption. Possibly
      *      useful for debugging, not recommended for machine consumption.
      */
-    public JsonEventFormatter() {
-        String defaultHostName;
+    public JsonEventFormatter()
+    {
+        this(
+            getLoggerPropertyOrDefault(SOURCEHOST_PROPERTY, defaultHostName()),
+            getLoggerPropertyOrDefault(SOURCE_PROPERTY, "java"),
+            defaultTags(),
+            defaultJsonFactory());
+    }
+
+    private static String defaultHostName()
+    {
         try {
-            defaultHostName = InetAddress.getLocalHost().getHostName();
+            return InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException ex) {
-            defaultHostName = "unknown-host";
+            return "unknown-host";
         }
-        hostName = getLoggerPropertyOrDefault(SOURCEHOST_PROPERTY, defaultHostName);
+    }
 
-        sourceName = getLoggerPropertyOrDefault(SOURCE_PROPERTY, "java");
-
+    private static List<String> defaultTags()
+    {
         final String configuredTagsString = getLoggerPropertyOrDefault(TAG_PROPERTY, "");
         if (!"".equals(configuredTagsString)) {
             final String[] configuredTags = configuredTagsString.split(TAG_SEPARATOR_REGEX);
-            this.tags = Collections.unmodifiableList(Arrays.asList(configuredTags));
+            return Arrays.asList(configuredTags);
         } else {
-            this.tags= Collections.emptyList();
+            return new ArrayList<>();
         }
+    }
 
+    private static JsonGeneratorFactory defaultJsonFactory()
+    {
         final String prettyProperty = getLoggerPropertyOrDefault(PRETTY_PROPERTY, "false");
         final HashMap<String, String> jsonConfig = new HashMap<>(1);
         if ("true".equalsIgnoreCase(prettyProperty) || "yes".equalsIgnoreCase(prettyProperty)) {
             jsonConfig.put(JsonGenerator.PRETTY_PRINTING, prettyProperty);
         }
-        jsonFactory = Json.createGeneratorFactory(jsonConfig);
-        threadNames = Collections.unmodifiableSortedMap(new TreeMap<Long, String>());
+        return Json.createGeneratorFactory(jsonConfig);
     }
 
     /**
@@ -147,6 +160,7 @@ public class JsonEventFormatter extends Formatter {
         this.tags = Collections.unmodifiableList(new ArrayList(tags));
         this.jsonFactory = jsonFactory;
         threadNames = Collections.unmodifiableSortedMap(new TreeMap<Long, String>());
+        threadNamesLock = new Semaphore(1);
     }
 
     /**
@@ -309,12 +323,19 @@ public class JsonEventFormatter extends Formatter {
     private String getThreadName(long tid)
     {
         if (!threadNames.containsKey(tid)) {
-            updateThreadNames();
+            if (threadNamesLock.tryAcquire()) {
+                try {
+                    updateThreadNames();
+                }
+                finally {
+                    threadNamesLock.release();
+                }
+            }
         }
         return threadNames.get(tid);
     }
 
-    private synchronized void updateThreadNames()
+    private void updateThreadNames()
     {
         ThreadGroup root = Thread.currentThread().getThreadGroup();
         while (true) {
