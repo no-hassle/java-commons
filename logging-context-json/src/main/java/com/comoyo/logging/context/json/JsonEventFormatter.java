@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -78,6 +79,7 @@ public class JsonEventFormatter extends Formatter {
 
     // Immutable and replaceable
     private volatile SortedMap<Long, String> threadNames;
+    private final Semaphore threadNamesLock;
 
     /**
      * Default constructor for use by java.util.logging - retrieves configuration
@@ -158,6 +160,7 @@ public class JsonEventFormatter extends Formatter {
         this.tags = Collections.unmodifiableList(new ArrayList(tags));
         this.jsonFactory = jsonFactory;
         threadNames = Collections.unmodifiableSortedMap(new TreeMap<Long, String>());
+        threadNamesLock = new Semaphore(1);
     }
 
     /**
@@ -320,12 +323,19 @@ public class JsonEventFormatter extends Formatter {
     private String getThreadName(long tid)
     {
         if (!threadNames.containsKey(tid)) {
-            updateThreadNames();
+            if (threadNamesLock.tryAcquire()) {
+                try {
+                    updateThreadNames();
+                }
+                finally {
+                    threadNamesLock.release();
+                }
+            }
         }
         return threadNames.get(tid);
     }
 
-    private synchronized void updateThreadNames()
+    private void updateThreadNames()
     {
         ThreadGroup root = Thread.currentThread().getThreadGroup();
         while (true) {
