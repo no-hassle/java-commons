@@ -7,7 +7,7 @@ Comoyo) Communications group
 
 The list of components currently reads as follows:
 
-* [amazonaws-utils](amazonaws-utils) AWS utilities not convered in the offical SDK
+* [amazonaws-utils](amazonaws-utils) AWS utilities not covered in the offical SDK
 * [logging-context](logging-context) Structured application state/context for logging
 * [logging-context-gelf](logging-context-gelf) Context-aware GELF log handler
 * [logging-context-json](logging-context-json) Context-aware JSON/logstash log formatter
