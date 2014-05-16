@@ -1,14 +1,12 @@
 package com.comoyo.maven.plugins.protoc;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 
@@ -19,8 +17,6 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -112,7 +108,7 @@ public class ProtocBundledMojo extends AbstractMojo
      * @readonly
      * @required
      */
-    protected List remoteRepositories;
+    protected List<ArtifactRepository> remoteRepositories;
 
 
     /**
@@ -141,6 +137,23 @@ public class ProtocBundledMojo extends AbstractMojo
      *     default-value="${project.build.directory}/generated-sources/protobuf"
      */
     private File outputDirectory;
+
+    /**
+     * Directories containing *.proto files to compile for test.
+     *
+     * @parameter
+     *     property="testInputDirectories"
+     */
+    private File[] testInputDirectories;
+
+    /**
+     * Output directory for generated Java class files.
+     *
+     * @parameter
+     *     property="testOutputDirectory"
+     *     default-value="${project.build.directory}/generated-test-sources/protobuf"
+     */
+    private File testOutputDirectory;
 
     /**
      * Path to existing protoc to use.  Overrides auto-detection and
@@ -312,14 +325,14 @@ public class ProtocBundledMojo extends AbstractMojo
      * @param dir   base dir for input file, used to resolve includes
      * @param input   input file to compile
      */
-    private void compileFile(File dir, File input)
+    private void compileFile(File inputDir, File input, File outputDir)
         throws MojoExecutionException
     {
         try {
             final Process proc
                 = new ProcessBuilder(protocExec.toString(),
-                                     "--proto_path=" + dir.getAbsolutePath(),
-                                     "--java_out=" + outputDirectory,
+                                     "--proto_path=" + inputDir.getAbsolutePath(),
+                                     "--java_out=" + outputDir,
                                      input.getAbsolutePath())
                 .redirectErrorStream(true)
                 .start();
@@ -348,23 +361,29 @@ public class ProtocBundledMojo extends AbstractMojo
      * Compile all *.proto files found under inputDirectories.
      *
      */
-    private void compileAllFiles()
+    private boolean compileAllFiles(String tag, File[] inputDirs, File outputDir)
         throws MojoExecutionException
     {
         final IOFileFilter filter = new SuffixFileFilter(".proto");
-        if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs();
-        }
 
-        for (File dir : inputDirectories) {
+        boolean seen = false;
+        for (File inputDir : inputDirs) {
+            if (!inputDir.exists()) {
+                continue;
+            }
+            if (!outputDir.exists()) {
+                outputDir.mkdirs();
+            }
+            getLog().info("Compiling " + inputDir + " to " + outputDir + " [" + tag + "]");
             Iterator<File> files
-                = FileUtils.iterateFiles(dir, filter, TrueFileFilter.INSTANCE);
+                = FileUtils.iterateFiles(inputDir, filter, TrueFileFilter.INSTANCE);
             while (files.hasNext()) {
                 final File input = files.next();
-                compileFile(dir, input);
+                compileFile(inputDir, input, outputDir);
+                seen = true;
             }
         }
-        project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
+        return seen;
     }
 
     /**
@@ -376,14 +395,19 @@ public class ProtocBundledMojo extends AbstractMojo
         throws MojoExecutionException
     {
         ensureProtocBinaryPresent();
-        getLog().info("Input directories:");
+
         if (inputDirectories.length == 0) {
             inputDirectories = new File[]{new File(project.getBasedir(), "src/main/protobuf")};
         }
-        for (File input : inputDirectories){
-            getLog().info("  " + input);
+        if (compileAllFiles("main", inputDirectories, outputDirectory)) {
+            project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
         }
-        getLog().info("Compiling to " + outputDirectory);
-        compileAllFiles();
+
+        if (testInputDirectories.length == 0) {
+            testInputDirectories = new File[]{new File(project.getBasedir(), "src/test/protobuf")};
+        }
+        if (compileAllFiles("test", testInputDirectories, testOutputDirectory)) {
+            project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
+        }
     }
 }
