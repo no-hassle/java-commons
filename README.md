@@ -17,6 +17,14 @@ Maven Plugin Mojo for compiling Protobuf schema files. Protobuf compiler binarie
 
     Output directory for generated Java class files.  Defaults to `${project.build.directory}/generated-sources/protobuf`.
 
+* testInputDirectories
+
+    Directories containing test *.proto files to compile.  Defaults to `${project.basedir}/src/test/protobuf`.
+
+* testOutputDirectory
+
+    Output directory for generated Java class test files.  Defaults to `${project.build.directory}/generated-test-sources/protobuf`.
+
 * protocExec
 
     Path to existing protoc to use. Overrides auto-detection and use of bundled protoc.
@@ -29,7 +37,7 @@ Maven Plugin Mojo for compiling Protobuf schema files. Protobuf compiler binarie
   <plugin>
     <groupId>com.comoyo.maven.plugins</groupId>
     <artifactId>protoc-bundled-plugin</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <executions>
       <execution>
         <goals>
