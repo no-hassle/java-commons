@@ -36,6 +36,7 @@
     <module>logging-context</module>
     <module>logging-context-gelf</module>
     <module>logging-context-json</module>
+    <module>emjar</module>
   </modules>
 
   <build>
