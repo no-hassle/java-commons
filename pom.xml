@@ -37,6 +37,7 @@
     <module>logging-context-gelf</module>
     <module>logging-context-json</module>
     <module>emjar</module>
+    <module>emjar-maven-plugin</module>
   </modules>
 
   <build>
@@ -142,6 +143,10 @@
             <offlineLink>
               <url>http://logging.paluch.biz/apidocs</url>
               <location>../../../javadoc/logging.paluch.biz</location>
+            </offlineLink>
+            <offlineLink>
+              <url>http://maven.apache.org/ref/3.0.5/maven-artifact/apidocs</url>
+              <location>../../../javadoc/maven.apache.org/maven-artifact</location>
             </offlineLink>
           </offlineLinks>
         </configuration>
