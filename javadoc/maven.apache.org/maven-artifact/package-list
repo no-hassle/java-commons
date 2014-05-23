@@ -1,0 +1,11 @@
+org.apache.maven.artifact
+org.apache.maven.artifact.handler
+org.apache.maven.artifact.metadata
+org.apache.maven.artifact.repository
+org.apache.maven.artifact.repository.layout
+org.apache.maven.artifact.repository.metadata
+org.apache.maven.artifact.resolver
+org.apache.maven.artifact.resolver.filter
+org.apache.maven.artifact.versioning
+org.apache.maven.repository
+org.apache.maven.repository.legacy.metadata

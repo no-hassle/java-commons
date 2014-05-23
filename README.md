@@ -12,3 +12,5 @@ The list of components currently reads as follows:
 * [logging-context-gelf](logging-context-gelf) Context-aware GELF log handler
 * [logging-context-json](logging-context-json) Context-aware JSON/logstash log formatter
 * [pb-json](pb-json) Hassle-free conversion from Protobuf to JSON and back
+* [emjar](emjar) Class loader and supporting cast for using jar-in-jar embedded archives as part of classpath
+* [emjar-maven-plugin](emjar-maven-plugin) Generate EmJar-enabled bundle archives from Maven
