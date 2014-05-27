@@ -44,6 +44,7 @@
     <module>logging-context</module>
     <module>logging-context-gelf</module>
     <module>logging-context-json</module>
+    <module>logging-utilities</module>
     <module>emjar</module>
     <module>emjar-maven-plugin</module>
   </modules>
