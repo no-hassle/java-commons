@@ -7,7 +7,11 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
 
 * finalName
 
-    Final name for generated Java Archive file.
+    Final name root for generated bundle jar file.  Defaults to `${project.artifactId}-${project.version}`.
+
+* bundleSuffix
+
+    Suffix appended to `finalName` when building output bundle name.  Defaults to `-emjar`.
 
 * explicitOrderings
 
@@ -15,7 +19,7 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
 
 *  mainJar
 
-    Jar file containing main application code.
+    Jar file containing main application code.  Defaults to `${project.build.directory}/${project.build.finalName}.jar`.
 
 *  manifestEntries
 
@@ -23,11 +27,15 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
 
 * outputDirectory
 
-    Output directory for generated jar file.
+    Output directory for generated jar file.  Defaults to `${project.build.directory}`.
 
 * ignoreConflicts
 
-    Ingore jar content conflicts.
+    Ingore jar content conflicts.  Defaults to `false`.
+
+* conflictsFatal
+
+    Consider (unresolved) jar content conflicts fatal to the build process.  Defaults to `false`.
 
 
 ### Minimal usage example
@@ -67,6 +75,8 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
         </goals>
         <configuration>
           <finalName>${project.artifactId}-${project.version}-${git.commit.id.abbrev}</finalName>
+          <bundleSuffix>-jar-with-dependencies</bundleSuffix>
+          <conflictsFatal>true</conflictsFatal>
           <explicitOrderings>
             <explicitOrdering>
               <prefer>org.slf4j:log4j-over-slf4j</prefer>
