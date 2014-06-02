@@ -131,6 +131,15 @@ public class EmJarMojo
     private String finalName;
 
     /**
+     * Suffix for generated Java Archive file.
+     *
+     * @parameter
+     *     property="bundleSuffix"
+     *     default-value="-emjar"
+     */
+    private String bundleSuffix;
+
+    /**
      * Set of explicit orderings for dependency artifacts that contain
      * conflicting entries.
      *
@@ -140,13 +149,22 @@ public class EmJarMojo
     private Ordering[] explicitOrderings;
 
     /**
-     * Ingore JAR content conflicts.
+     * Ignore JAR content conflicts.
      *
      * @parameter
      *     property="ignoreConflicts"
      *     default-value="false"
      */
     private boolean ignoreConflicts;
+
+    /**
+     * Consider (unresolved) JAR content conflicts fatal to the build process.
+     *
+     * @parameter
+     *     property="conflictsFatal"
+     *     default-value="false"
+     */
+    private boolean conflictsFatal;
 
     /**
      * Additional Manifest entries to include in top-level JAR.
@@ -336,6 +354,7 @@ public class EmJarMojo
         final LinkedList<Artifact> ordered = new LinkedList<>();
         final LinkedList<Artifact> toOrder = new LinkedList<>(artifacts);
         final LinkedList<Ordering> toApply = new LinkedList<>(Arrays.asList(orderings));
+        boolean conflictsSeen = false;
 
         while (!toOrder.isEmpty()) {
             final Iterator<Artifact> remaining = toOrder.descendingIterator();
@@ -386,6 +405,7 @@ public class EmJarMojo
                         Set<String> files = getConflicts(toPlace, after);
                         if (files != null && !files.isEmpty()) {
                             reportConflict(toPlace, after, files);
+                            conflictsSeen = true;
                         }
                     }
                 }
@@ -406,6 +426,10 @@ public class EmJarMojo
                 getLog().warn("    prefer " + ordering.getPrefer()
                               + " over " + ordering.getOver());
             }
+        }
+        if (conflictsSeen && conflictsFatal) {
+            throw new MojoExecutionException(
+                "Aborting due to jar content conflicts");
         }
         return ordered;
     }
@@ -454,7 +478,12 @@ public class EmJarMojo
         throws MojoExecutionException
     {
         try {
-            final File outFile = new File(outputDirectory, finalName + "-emjar.jar");
+            final File outFile = new File(outputDirectory, finalName + bundleSuffix + ".jar");
+            getLog().info("Building jar: " + outFile.getPath());
+            if (ignoreConflicts && conflictsFatal) {
+                throw new MojoExecutionException(
+                    "Invalid configuration; both ignoreConflicts and conflictsFatal set.");
+            }
             final JarFile main = new JarFile(mainJar);
             final Attributes mainAttrs = main.getManifest().getMainAttributes();
             final Manifest manifest = new Manifest();
