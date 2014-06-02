@@ -19,7 +19,7 @@ package com.comoyo.emjar;
 import java.io.File;
 import java.io.InputStream;
 import java.net.JarURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -37,7 +37,7 @@ public class PreloadedEmbeddedJarTest
         throws Exception
     {
         return new PreloadedEmbeddedJar.Connection(
-            new URL("jar:file:" + root.getPath() + "!/" + jarName + "!/"),
+            new URI("jar:file", root.getPath() + "!/" + jarName + "!/", null).toURL(),
             root.getPath(),
             jarName,
             entryName);

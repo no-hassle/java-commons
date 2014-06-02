@@ -17,18 +17,22 @@
 package com.comoyo.emjar;
 
 import java.io.File;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public abstract class EmJarTest
 {
-    protected File getResourceFile(String name) {
+    public static final String WEIRD = "æøå😱 %&;*+`\"\\-weird";
+
+    protected File getResourceFile(String name)
+        throws URISyntaxException
+    {
         final ClassLoader cl = getClass().getClassLoader();
-        final URL url = cl.getResource("com/comoyo/emjar/" + name);
-        if (!"file".equals(url.getProtocol())) {
+        final URI uri = cl.getResource("com/comoyo/emjar/" + name).toURI();
+        if (!"file".equals(uri.getScheme())) {
             throw new IllegalArgumentException(
-                "Resource " + name + " not present as file (" + url + ")");
+                "Resource " + name + " not present as file (" + uri + ")");
         }
-        return new File(URLDecoder.decode(url.getPath()));
+        return new File(uri.getSchemeSpecificPart());
     }
 }
