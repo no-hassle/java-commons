@@ -17,6 +17,8 @@
 package com.comoyo.emjar;
 
 import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
@@ -29,6 +31,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 
@@ -67,6 +71,9 @@ import java.io.IOException;
 public class EmJarClassLoader
     extends URLClassLoader
 {
+    public final static String SEPARATOR = "!/";
+
+    private final static Logger logger = Logger.getLogger(EmJarClassLoader.class.getName());
     private final static HandlerFactory factory = new HandlerFactory();
 
     static {
@@ -79,17 +86,21 @@ public class EmJarClassLoader
 
     public EmJarClassLoader()
     {
-        super(getClassPath(), null, factory);
+        super(getClassPath(System.getProperties()), null, factory);
     }
 
     public EmJarClassLoader(ClassLoader parent)
     {
-        super(getClassPath(), parent, factory);
+        super(getClassPath(System.getProperties()), parent, factory);
     }
 
-    private static URL[] getClassPath()
+    protected EmJarClassLoader(Properties props)
     {
-        final Properties props = System.getProperties();
+        super(getClassPath(props), null, factory);
+    }
+
+    private static URL[] getClassPath(final Properties props)
+    {
         final String classPath = props.getProperty("java.class.path");
         final String pathSep = props.getProperty("path.separator");
         final String fileSep = props.getProperty("file.separator");
@@ -102,19 +113,20 @@ public class EmJarClassLoader
             }
             final String full = elem.startsWith(fileSep) ? elem : userDir + fileSep + elem;
             try {
-                urls.add(new URL("file:" + full));
+                urls.add(new URI("file", full, null).toURL());
                 final JarFile jar = new JarFile(elem);
-                Enumeration<JarEntry> embedded = jar.entries();
+                final Enumeration<JarEntry> embedded = jar.entries();
                 while (embedded.hasMoreElements()) {
                     final JarEntry entry = embedded.nextElement();
                     if (entry.getName().endsWith(".jar")) {
-                        urls.add(new URL("jar:file:" + full + "!/" + entry.getName()));
+                        urls.add(new URI("jar:file", full + SEPARATOR + entry.getName(), null).toURL());
                     }
                 }
                 jar.close();
             }
-            catch (IOException e) {
-                e.printStackTrace();
+            catch (IOException|URISyntaxException e) {
+                logger.log(Level.SEVERE, "Unable to process classpath entry " + elem, e);
+                // Trying to get by on the classpath entries we can process.
             }
         }
         return urls.toArray(new URL[0]);
@@ -151,23 +163,45 @@ public class EmJarClassLoader
         protected URLConnection openConnection(URL url)
             throws IOException
         {
-            final String spec = url.getFile();
-            if (!spec.startsWith("jar:file:")) {
-                throw new IOException("Unable to handle " + spec);
+            final URI bundle;
+            final URI file;
+            try {
+                final URI nested = url.toURI();
+                if (!"jar".equals(nested.getScheme())) {
+                    throw new IOException(
+                        "Unexpected nested scheme passed to openConnection (expeced jar): "
+                            + nested.getScheme());
+                }
+                bundle = new URI(nested.getRawSchemeSpecificPart());
+                if (!"jar".equals(bundle.getScheme())) {
+                    throw new IOException(
+                        "Unexpected bundle scheme passed to openConnection (expected jar): "
+                            + bundle.getScheme());
+                }
+                file = new URI(bundle.getRawSchemeSpecificPart());
+                if (!"file".equals(file.getScheme())) {
+                    throw new IOException(
+                        "Unexpected location scheme passed to openConnection (expected file): "
+                            + file.getScheme());
+                }
             }
-            JarURLConnection conn = connections.get(spec);
+            catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
+            final String path = file.getSchemeSpecificPart();
+            JarURLConnection conn = connections.get(path);
             if (conn == null) {
                 synchronized (connections) {
-                    conn = connections.get(spec);
+                    conn = connections.get(path);
                     if (conn == null) {
-                        final int i = spec.indexOf("!/");
-                        final int j = spec.indexOf("!/", i + 1);
+                        final int i = path.indexOf(SEPARATOR);
+                        final int j = path.indexOf(SEPARATOR, i + 1);
                         if (i < 0 || j < 0) {
-                            throw new IOException("Unable to parse " + spec);
+                            throw new IOException("Unable to parse " + path);
                         }
-                        final String root = spec.substring(9, i);
-                        final String nested = spec.substring(i + 2, j);
-                        final String entry = spec.substring(j + 2);
+                        final String root = path.substring(0, i);
+                        final String nested = path.substring(i + SEPARATOR.length(), j);
+                        final String entry = path.substring(j + SEPARATOR.length());
 
                         Map<String, Map<String, OndemandEmbeddedJar.Descriptor>> rootJar
                             = rootJars.get(root);
@@ -186,13 +220,13 @@ public class EmJarClassLoader
                             = rootJar.get(nested);
                         if (descriptors != null) {
                             conn = new OndemandEmbeddedJar.Connection(
-                                new URL(spec), root, descriptors, entry);
+                                bundle.toURL(), root, descriptors, entry);
                         }
                         else {
                             conn = new PreloadedEmbeddedJar.Connection(
-                                new URL(spec), root, nested, entry);
+                                bundle.toURL(), root, nested, entry);
                         }
-                        connections.put(spec, conn);
+                        connections.put(path, conn);
                     }
                 }
             }

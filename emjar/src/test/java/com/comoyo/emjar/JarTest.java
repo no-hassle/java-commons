@@ -70,4 +70,11 @@ public abstract class JarTest extends EmJarTest
             }
         }
     }
+
+    @Test
+    public void testQuoting()
+        throws Exception
+    {
+        testJarBundle(WEIRD);
+    }
 }

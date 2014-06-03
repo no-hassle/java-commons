@@ -55,3 +55,4 @@ for my $m (0, 1) {
 createZip("s-large", {Stream => 0}, {}, 1);
 createZip("S-large", {Stream => 1}, {}, 1);
 createZip("Z-large", {}, {}, 1, ZIP_CM_DEFLATE);
+createZip("æøå😱 %&;*+`\"\\-weird", {}, {});
