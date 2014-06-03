@@ -49,11 +49,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <inputDirectories>
-            <inputDirectory>${project.basedir}/src/test/protobuf</inputDirectory>
-          </inputDirectories>
-        </configuration>
       </plugin>
     </plugins>
   </build>
