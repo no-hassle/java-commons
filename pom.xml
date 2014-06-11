@@ -49,6 +49,12 @@
       <email>argggh@comoyo.com</email>
       <url>https://github.com/argggh</url>
     </developer>
+    <developer>
+      <id>bung</id>
+      <name>Mikael Bung</name>
+      <email>mikael@comoyo.com</email>
+      <url>https://github.com/phyrex1an</url>
+    </developer>
   </developers>
 
   <modules>
