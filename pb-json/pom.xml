@@ -8,7 +8,7 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>com.comoyo</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.38</version>
   </parent>
 
   <name>pb-json - Tools for working with Protobuf and Json</name>
