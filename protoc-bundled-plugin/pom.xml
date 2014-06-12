@@ -2,9 +2,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <artifactId>commons</artifactId>
+    <groupId>com.comoyo</groupId>
+    <version>1.4-SNAPSHOT</version>
+  </parent>
+
   <groupId>com.comoyo.maven.plugins</groupId>
   <artifactId>protoc-bundled-plugin</artifactId>
-  <version>1.3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <prerequisites>
     <maven>3</maven>
@@ -12,10 +17,9 @@
 
   <name>protoc-bundled-plugin -- Batteries included Maven Protobuf compiler Plugin</name>
 
-  <url></url>
+  <url>https://github.com/comoyo/commons/protoc-bundled-plugin</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.6</java.version>
   </properties>
 
@@ -29,7 +33,7 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.0.4</version>
+      <version>3.0.5</version>
     </dependency>
 
     <dependency>
@@ -60,7 +64,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

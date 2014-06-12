@@ -8,15 +8,15 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <protoc.plugin.version>1.3.0</protoc.plugin.version>
     <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
     <google.guava.version>14.0</google.guava.version>
+    <junit.version>4.11</junit.version>
   </properties>
 
   <name>Comoyo Commons Multi-Module POM</name>
   <groupId>com.comoyo</groupId>
   <artifactId>commons</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.4-SNAPSHOT</version>
   <description>Collection of utility components</description>
 
   <url>https://github.com/comoyo/commons</url>
@@ -70,6 +70,7 @@
 
   <modules>
     <module>pb-json</module>
+    <module>protoc-bundled-plugin</module>
     <module>amazonaws-utils</module>
     <module>logging-context</module>
     <module>logging-context-gelf</module>
