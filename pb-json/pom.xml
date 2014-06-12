@@ -41,7 +41,7 @@
       <plugin>
         <groupId>com.comoyo.maven.plugins</groupId>
         <artifactId>protoc-bundled-plugin</artifactId>
-        <version>${project.version}</version>
+        <version>1.4-SNAPSHOT</version>
         <executions>
           <execution>
             <goals>
