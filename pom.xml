@@ -105,15 +105,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>1.8</version>
-        <executions>
-          <execution>
-            <phase>pre-site</phase>
-            <id>parse-version</id>
-            <goals>
-              <goal>parse-version</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -124,15 +115,6 @@
         <configuration>
           <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${buildNum}</newVersion>
         </configuration>
-        <executions>
-          <execution>
-            <phase>pre-site</phase>
-            <id>set-version</id>
-            <goals>
-              <goal>set</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
