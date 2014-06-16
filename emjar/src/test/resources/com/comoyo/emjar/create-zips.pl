@@ -13,7 +13,7 @@ sub createZip {
     my $buf = "";
     my $inner = Archive::Zip::SimpleZip->new(\$buf, %$initargs)
 	or die "Unable to create Zip";
-    $inner->addString($DEFAULT_MANIFEST,
+    $inner->addString("X-EmJar-Test: inner\r\n".$DEFAULT_MANIFEST,
 		      Name => "META-INF/MANIFEST.MF",
 		      Time => $TIMESTAMP + 1);
     if ($oversize) {
@@ -29,7 +29,7 @@ sub createZip {
 
     my $outer = Archive::Zip::SimpleZip->new("bundle-$name.jar", %$initargs)
 	or die "Unable to create Zip";
-    $outer->addString($DEFAULT_MANIFEST,
+    $outer->addString("X-EmJar-Test: bundle\r\n".$DEFAULT_MANIFEST,
 		      Name => "META-INF/MANIFEST.MF",
 		      Time => $TIMESTAMP + 4);
     $outer->addString($buf,
