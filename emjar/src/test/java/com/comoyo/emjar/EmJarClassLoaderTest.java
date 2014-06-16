@@ -19,10 +19,15 @@ package com.comoyo.emjar;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Properties;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +40,8 @@ import static org.junit.Assert.*;
 @RunWith(JUnit4.class)
 public class EmJarClassLoaderTest extends EmJarTest
 {
-    @Test
-    public void testClassPathQuoting()
-        throws Exception
+    private EmJarClassLoader testLoader()
+        throws URISyntaxException
     {
         final FilenameFilter jarFilter = new FilenameFilter() {
                 @Override
@@ -53,9 +57,39 @@ public class EmJarClassLoaderTest extends EmJarTest
         props.setProperty("path.separator", ":");
         props.setProperty("file.separator", "/");
         props.setProperty("user.dir", "/tmp");
-        final EmJarClassLoader loader = new EmJarClassLoader(props);
+        return new EmJarClassLoader(props);
+    }
+
+    @Test
+    public void testClassPathQuoting()
+        throws Exception
+    {
+        final EmJarClassLoader loader = testLoader();
         final InputStream is = loader.getResourceAsStream("entry-" + WEIRD + ".txt");
         final BufferedReader entry = new BufferedReader(new InputStreamReader(is));
         assertEquals("Contents mismatch for weird entry", WEIRD, entry.readLine());
+    }
+
+    @Test
+    public void testOpenConnection()
+        throws Exception
+    {
+        final EmJarClassLoader loader = testLoader();
+        final URL urls[] = loader.getURLs();
+        for (URL url : urls) {
+            if ("jar".equals(url.getProtocol())) {
+                final URLConnection conn = url.openConnection();
+                assertTrue("Connection not of type JarURLConnection",
+                           conn instanceof JarURLConnection);
+                final JarURLConnection jarConn = (JarURLConnection) conn;
+                final JarFile jarFile = jarConn.getJarFile();
+                final Manifest mf = jarFile.getManifest();
+                final String attr = mf.getMainAttributes().getValue("X-EmJar-Test");
+                assertEquals("Invalid inner lib manifest structure",
+                             "inner", attr);
+                return;
+            }
+        }
+        fail("Did not find any elements in classpath with protocol jar");
     }
 }

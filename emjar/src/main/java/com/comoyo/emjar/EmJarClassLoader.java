@@ -75,6 +75,7 @@ public class EmJarClassLoader
 
     private final static Logger logger = Logger.getLogger(EmJarClassLoader.class.getName());
     private final static HandlerFactory factory = new HandlerFactory();
+    private final static Handler handler = new Handler();
 
     static {
         try {
@@ -119,7 +120,8 @@ public class EmJarClassLoader
                 while (embedded.hasMoreElements()) {
                     final JarEntry entry = embedded.nextElement();
                     if (entry.getName().endsWith(".jar")) {
-                        urls.add(new URI("jar:file", full + SEPARATOR + entry.getName(), null).toURL());
+                        final URL url = new URI("jar:file", full + SEPARATOR + entry.getName(), null).toURL();
+                        urls.add(new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), handler));
                     }
                 }
                 jar.close();
@@ -142,8 +144,6 @@ public class EmJarClassLoader
     private static class HandlerFactory
         implements URLStreamHandlerFactory
     {
-        private final Handler handler = new Handler();
-
         @Override
         public URLStreamHandler createURLStreamHandler(String protocol)
         {
@@ -164,7 +164,7 @@ public class EmJarClassLoader
             throws IOException
         {
             final URI bundle;
-            final URI file;
+            final String path;
             try {
                 final URI nested = url.toURI();
                 if (!"jar".equals(nested.getScheme())) {
@@ -173,22 +173,29 @@ public class EmJarClassLoader
                             + nested.getScheme());
                 }
                 bundle = new URI(nested.getRawSchemeSpecificPart());
-                if (!"jar".equals(bundle.getScheme())) {
-                    throw new IOException(
-                        "Unexpected bundle scheme passed to openConnection (expected jar): "
-                            + bundle.getScheme());
+                if ("jar".equals(bundle.getScheme())) {
+                    final URI file = new URI(bundle.getRawSchemeSpecificPart());
+                    if (!"file".equals(file.getScheme())) {
+                        throw new IOException(
+                            "Unexpected location scheme passed to openConnection (expected file): "
+                                + file.getScheme());
+                    }
+                    path = file.getSchemeSpecificPart();
                 }
-                file = new URI(bundle.getRawSchemeSpecificPart());
-                if (!"file".equals(file.getScheme())) {
-                    throw new IOException(
-                        "Unexpected location scheme passed to openConnection (expected file): "
-                            + file.getScheme());
+                else {
+                    if ("file".equals(bundle.getScheme())) {
+                        path = bundle.getSchemeSpecificPart() + SEPARATOR;
+                    }
+                    else {
+                        throw new IOException(
+                            "Unexpected bundle scheme passed to openConnection (expected jar or file): "
+                                + bundle.getScheme());
+                    }
                 }
             }
             catch (URISyntaxException e) {
                 throw new IOException(e);
             }
-            final String path = file.getSchemeSpecificPart();
             JarURLConnection conn = connections.get(path);
             if (conn == null) {
                 synchronized (connections) {
