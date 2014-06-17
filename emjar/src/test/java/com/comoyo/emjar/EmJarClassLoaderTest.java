@@ -53,10 +53,7 @@ public class EmJarClassLoaderTest extends EmJarTest
         final File allJars[] = bundle.getParentFile().listFiles(jarFilter);
 
         final Properties props = new Properties();
-        props.setProperty("java.class.path", Joiner.on(":").join(allJars));
-        props.setProperty("path.separator", ":");
-        props.setProperty("file.separator", "/");
-        props.setProperty("user.dir", "/tmp");
+        props.setProperty("java.class.path", Joiner.on(File.pathSeparator).join(allJars));
         return new EmJarClassLoader(props);
     }
 

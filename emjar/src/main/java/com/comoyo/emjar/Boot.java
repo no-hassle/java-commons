@@ -59,6 +59,13 @@ public class Boot
     public static void main(String[] args)
         throws Exception
     {
+        final Method mainMethod = findMain(System.getProperties());
+        mainMethod.invoke(null, new Object[]{args});
+    }
+
+    public static Method findMain(Properties props)
+        throws Exception
+    {
         final EmJarClassLoader loader = new EmJarClassLoader(ClassLoader.getSystemClassLoader());
         Thread.currentThread().setContextClassLoader(loader);
 
@@ -73,13 +80,16 @@ public class Boot
         }
         catch (NoSuchFieldException e) {
             // Unable to set system class loader; continuing anyway
+            if (!EmJarClassLoader.QUIET) {
+                System.err.println("EmJar: unable to replace system class loader: "
+                                   + e.getMessage());
+            }
         }
 
         final String systemPropsName
-            = System.getProperty(EMJAR_SYSTEM_PROPS_PROP,
-                                 getManifestAttribute(EMJAR_SYSTEM_PROPS_ATTR));
+            = props.getProperty(EMJAR_SYSTEM_PROPS_PROP,
+                                getManifestAttribute(EMJAR_SYSTEM_PROPS_ATTR));
         if (systemPropsName != null) {
-            final Properties props = System.getProperties();
             final InputStream is = loader.getResourceAsStream(systemPropsName);
             if (is != null) {
                 props.load(new InputStreamReader(is));
@@ -87,8 +97,8 @@ public class Boot
             }
         }
         final String mainClassName
-            = System.getProperty(EMJAR_MAIN_CLASS_PROP,
-                                 getManifestAttribute(EMJAR_MAIN_CLASS_ATTR));
+            = props.getProperty(EMJAR_MAIN_CLASS_PROP,
+                                getManifestAttribute(EMJAR_MAIN_CLASS_ATTR));
         if (mainClassName == null) {
             throw new RuntimeException(
                 "No main class specified using "
@@ -97,9 +107,7 @@ public class Boot
 
         final Class<?> mainClass
             = Class.forName(mainClassName, false, loader);
-        final Method mainMethod
-            = mainClass.getDeclaredMethod("main", new Class[]{String[].class});
-        mainMethod.invoke(null, new Object[]{args});
+        return mainClass.getDeclaredMethod("main", String[].class);
     }
 
     private static String getManifestAttribute(String key)

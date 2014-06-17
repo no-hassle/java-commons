@@ -17,6 +17,7 @@
 package com.comoyo.emjar;
 
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,8 +32,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 
@@ -71,9 +70,14 @@ import java.io.IOException;
 public class EmJarClassLoader
     extends URLClassLoader
 {
+    public final static String EMJAR_LOG_QUIET_PROP = "emjar.log.quiet";
+    public final static String EMJAR_LOG_DEBUG_PROP = "emjar.log.debug";
+
+    protected static boolean DEBUG = false;
+    protected static boolean QUIET = false;
+
     public final static String SEPARATOR = "!/";
 
-    private final static Logger logger = Logger.getLogger(EmJarClassLoader.class.getName());
     private final static HandlerFactory factory = new HandlerFactory();
     private final static Handler handler = new Handler();
 
@@ -103,35 +107,57 @@ public class EmJarClassLoader
     private static URL[] getClassPath(final Properties props)
     {
         final String classPath = props.getProperty("java.class.path");
-        final String pathSep = props.getProperty("path.separator");
-        final String fileSep = props.getProperty("file.separator");
-        final String userDir = props.getProperty("user.dir");
+        QUIET = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_QUIET_PROP, ""));
+        DEBUG = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_DEBUG_PROP, ""));
 
         final ArrayList<URL> urls = new ArrayList<>();
-        for (String elem : classPath.split(pathSep)) {
-            if (!elem.endsWith(".jar")) {
-                continue;
-            }
-            final String full = elem.startsWith(fileSep) ? elem : userDir + fileSep + elem;
+        for (String elem : classPath.split(File.pathSeparator)) {
+            final File file = new File(elem);
             try {
-                urls.add(new URI("file", full, null).toURL());
-                final JarFile jar = new JarFile(elem);
+                urls.add(file.toURI().toURL());
+                if (!file.isFile() || !file.getName().endsWith(".jar")) {
+                    continue;
+                }
+                final JarFile jar = new JarFile(file);
                 final Enumeration<JarEntry> embedded = jar.entries();
                 while (embedded.hasMoreElements()) {
                     final JarEntry entry = embedded.nextElement();
                     if (entry.getName().endsWith(".jar")) {
-                        final URL url = new URI("jar:file", full + SEPARATOR + entry.getName(), null).toURL();
-                        urls.add(new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile(), handler));
+                        final URI nested = new URI(
+                            "jar:file",
+                            file.getAbsolutePath() + SEPARATOR + entry.getName(),
+                            null);
+                        urls.add(uriToUrl(nested, handler));
                     }
                 }
                 jar.close();
             }
             catch (IOException|URISyntaxException e) {
-                logger.log(Level.SEVERE, "Unable to process classpath entry " + elem, e);
+                if (!QUIET) {
+                    System.err.println("EmJar: unable to process classpath entry " + elem);
+                }
+                if (DEBUG) {
+                    e.printStackTrace(System.err);
+                }
                 // Trying to get by on the classpath entries we can process.
             }
         }
+        if (DEBUG) {
+            System.err.println("EmJar: using classpath " + urls);
+        }
         return urls.toArray(new URL[0]);
+    }
+
+    private static URL uriToUrl(URI uri, Handler handler)
+        throws MalformedURLException
+    {
+        final URL url = uri.toURL();
+        return new URL(
+            url.getProtocol(),
+            url.getHost(),
+            url.getPort(),
+            url.getFile(),
+            handler);
     }
 
     @Override
@@ -195,6 +221,15 @@ public class EmJarClassLoader
             }
             catch (URISyntaxException e) {
                 throw new IOException(e);
+            }
+            catch (IOException e) {
+                if (DEBUG) {
+                    System.err.println("EmJar: " + e.getMessage());
+                }
+                throw e;
+            }
+            if (DEBUG) {
+                System.err.println("EmJar: loading " + path);
             }
             JarURLConnection conn = connections.get(path);
             if (conn == null) {
