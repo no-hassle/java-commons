@@ -15,7 +15,7 @@
   <groupId>com.comoyo.commons</groupId>
   <artifactId>emjar</artifactId>
 
-  <url>https://github.com/comoyo/commons/emjar</url>
+  <url>https://github.com/comoyo/commons/tree/master/emjar</url>
   <packaging>jar</packaging>
 
   <build>

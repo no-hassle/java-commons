@@ -15,7 +15,7 @@
   <groupId>com.comoyo.commons</groupId>
   <artifactId>logging-context</artifactId>
 
-  <url>https://github.com/comoyo/commons/logging-context</url>
+  <url>https://github.com/comoyo/commons/tree/master/logging-context</url>
   <packaging>jar</packaging>
 
   <build>
