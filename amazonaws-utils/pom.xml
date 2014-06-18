@@ -15,7 +15,7 @@
   <groupId>com.comoyo.commons</groupId>
   <artifactId>amazonaws-utils</artifactId>
 
-  <url>https://github.com/comoyo/commons/amazonaws-utils</url>
+  <url>https://github.com/comoyo/commons/tree/master/amazonaws-utils</url>
   <packaging>jar</packaging>
 
   <build>

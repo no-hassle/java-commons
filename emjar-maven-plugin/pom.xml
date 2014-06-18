@@ -15,7 +15,7 @@
   <groupId>com.comoyo.commons</groupId>
   <artifactId>emjar-maven-plugin</artifactId>
 
-  <url>https://github.com/comoyo/commons/emjar-maven-plugin</url>
+  <url>https://github.com/comoyo/commons/tree/master/emjar-maven-plugin</url>
   <packaging>maven-plugin</packaging>
 
   <prerequisites>

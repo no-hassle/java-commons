@@ -15,7 +15,7 @@
   <groupId>com.comoyo.protobuf</groupId>
   <artifactId>pb-json</artifactId>
 
-  <url>https://github.com/comoyo/commons/pb-json</url>
+  <url>https://github.com/comoyo/commons/tree/master/pb-json</url>
   <packaging>jar</packaging>
 
   <build>

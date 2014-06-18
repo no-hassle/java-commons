@@ -17,7 +17,7 @@
 
   <name>protoc-bundled-plugin -- Batteries included Maven Protobuf compiler Plugin</name>
 
-  <url>https://github.com/comoyo/commons/protoc-bundled-plugin</url>
+  <url>https://github.com/comoyo/commons/tree/master/protoc-bundled-plugin</url>
 
   <properties>
     <java.version>1.6</java.version>
