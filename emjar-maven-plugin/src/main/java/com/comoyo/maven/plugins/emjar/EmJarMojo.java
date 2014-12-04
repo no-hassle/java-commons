@@ -442,6 +442,10 @@ public class EmJarMojo
         final Artifact artifact)
         throws IOException
     {
+        final String type = artifact.getType();
+        if (!"jar".equals(type)) {
+            return;
+        }
         final File file = artifact.getFile();
         final JarFile jar = new JarFile(file);
         final Enumeration<? extends JarEntry> entries = jar.entries();
