@@ -19,6 +19,7 @@ package com.comoyo.emjar;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.apache.http.client.utils.URIBuilder;
 
 public abstract class EmJarTest
 {
@@ -28,7 +29,10 @@ public abstract class EmJarTest
         throws URISyntaxException
     {
         final ClassLoader cl = getClass().getClassLoader();
-        final URI uri = cl.getResource("com/comoyo/emjar/" + name).toURI();
+        final URI base = cl.getResource("com/comoyo/emjar/").toURI();
+        URIBuilder builder = new URIBuilder(base);
+        builder.setPath(builder.getPath() + name);
+        final URI uri = builder.build();
         if (!"file".equals(uri.getScheme())) {
             throw new IllegalArgumentException(
                 "Resource " + name + " not present as file (" + uri + ")");

@@ -131,7 +131,7 @@ public class EmJarMojo
     private String finalName;
 
     /**
-     * Suffix for generated Java Archive file.
+     * Suffix for generated Java Archive file ("NONE" for none).
      *
      * @parameter
      *     property="bundleSuffix"
@@ -177,6 +177,7 @@ public class EmJarMojo
 
     private static final String CREATED_BY = "Created-By";
     private static final int CHUNK_SIZE = 16 * 1024;
+    private static final String NONE = "NONE";
 
     private final Map<Artifact, Map<Artifact, Set<String>>> conflicts = new HashMap<>();
     private final Map<String, Set<Artifact>> seen = new HashMap<>();
@@ -482,7 +483,8 @@ public class EmJarMojo
         throws MojoExecutionException
     {
         try {
-            final File outFile = new File(outputDirectory, finalName + bundleSuffix + ".jar");
+            final String suffix = NONE.equals(bundleSuffix) ? "" : bundleSuffix;
+            final File outFile = new File(outputDirectory, finalName + suffix + ".jar");
             getLog().info("Building jar: " + outFile.getPath());
             if (ignoreConflicts && conflictsFatal) {
                 throw new MojoExecutionException(

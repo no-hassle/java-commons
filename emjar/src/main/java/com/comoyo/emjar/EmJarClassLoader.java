@@ -27,6 +27,7 @@ import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,14 +73,13 @@ public class EmJarClassLoader
 {
     public final static String EMJAR_LOG_QUIET_PROP = "emjar.log.quiet";
     public final static String EMJAR_LOG_DEBUG_PROP = "emjar.log.debug";
+    public final static String EMJAR_CLASS_PATH_PROP = "emjar.class.path";
+    public final static String JAVA_CLASS_PATH_PROP = "java.class.path";
 
     protected static boolean DEBUG = false;
     protected static boolean QUIET = false;
 
     public final static String SEPARATOR = "!/";
-
-    private final static HandlerFactory factory = new HandlerFactory();
-    private final static Handler handler = new Handler();
 
     static {
         try {
@@ -89,28 +89,45 @@ public class EmJarClassLoader
         }
     }
 
+    private EmJarClassLoader(
+            final Handler handler, final Properties props, final ClassLoader parent) {
+        super(getClassPath(props, handler), parent, new HandlerFactory(handler));
+    }
+
     public EmJarClassLoader()
     {
-        super(getClassPath(System.getProperties()), null, factory);
+        this(new Handler(), System.getProperties(), null);
     }
 
-    public EmJarClassLoader(ClassLoader parent)
+    public EmJarClassLoader(final ClassLoader parent)
     {
-        super(getClassPath(System.getProperties()), parent, factory);
+        this(new Handler(), System.getProperties(), parent);
     }
 
-    protected EmJarClassLoader(Properties props)
+    protected EmJarClassLoader(final Properties props)
     {
-        super(getClassPath(props), null, factory);
+        this(new Handler(), props, null);
     }
 
-    private static URL[] getClassPath(final Properties props)
+    private static URL[] getClassPath(final Properties props, final Handler handler)
     {
-        final String classPath = props.getProperty("java.class.path");
         QUIET = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_QUIET_PROP, ""));
         DEBUG = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_DEBUG_PROP, ""));
 
         final ArrayList<URL> urls = new ArrayList<>();
+        addClassPathUrls(props.getProperty(JAVA_CLASS_PATH_PROP), urls, handler);
+        addClassPathUrls(props.getProperty(EMJAR_CLASS_PATH_PROP), urls, handler);
+        if (DEBUG) {
+            System.err.println("EmJar: using classpath " + urls);
+        }
+        return urls.toArray(new URL[0]);
+    }
+
+    private static void addClassPathUrls(
+            final String classPath, final List<URL> urls, final Handler handler) {
+        if (classPath == null) {
+            return;
+        }
         for (String elem : classPath.split(File.pathSeparator)) {
             final File file = new File(elem);
             try {
@@ -142,10 +159,6 @@ public class EmJarClassLoader
                 // Trying to get by on the classpath entries we can process.
             }
         }
-        if (DEBUG) {
-            System.err.println("EmJar: using classpath " + urls);
-        }
-        return urls.toArray(new URL[0]);
     }
 
     private static URL uriToUrl(URI uri, Handler handler)
@@ -160,16 +173,15 @@ public class EmJarClassLoader
             handler);
     }
 
-    @Override
-    public Class<?> loadClass(String name)
-        throws ClassNotFoundException
-    {
-        return super.loadClass(name);
-    }
-
     private static class HandlerFactory
         implements URLStreamHandlerFactory
     {
+        private final Handler handler;
+
+        public HandlerFactory(final Handler handler) {
+            this.handler = handler;
+        }
+
         @Override
         public URLStreamHandler createURLStreamHandler(String protocol)
         {
@@ -244,6 +256,11 @@ public class EmJarClassLoader
                         final String root = path.substring(0, i);
                         final String nested = path.substring(i + SEPARATOR.length(), j);
                         final String entry = path.substring(j + SEPARATOR.length());
+                        if (!nested.endsWith(".jar")) {
+                            final URL urlDefaultHandler
+                                = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
+                            return urlDefaultHandler.openConnection();
+                        }
 
                         Map<String, Map<String, OndemandEmbeddedJar.Descriptor>> rootJar
                             = rootJars.get(root);
@@ -260,13 +277,14 @@ public class EmJarClassLoader
                         }
                         final Map<String, OndemandEmbeddedJar.Descriptor> descriptors
                             = rootJar.get(nested);
+                        final URL rootUrl = new URL("jar:file:" + root + SEPARATOR);
                         if (descriptors != null) {
                             conn = new OndemandEmbeddedJar.Connection(
-                                bundle.toURL(), root, descriptors, entry);
+                                rootUrl, root, descriptors, entry);
                         }
                         else {
                             conn = new PreloadedEmbeddedJar.Connection(
-                                bundle.toURL(), root, nested, entry);
+                                rootUrl, root, nested, entry);
                         }
                         connections.put(path, conn);
                     }

@@ -11,7 +11,11 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
 
 * bundleSuffix
 
-    Suffix appended to `finalName` when building output bundle name.  Defaults to `-emjar`.
+    Suffix appended to `finalName` when building output bundle name.
+    Defaults to `-emjar`.  (Due to the way pom files are parsed and
+    passed to plugins, an empty suffix cannot be directly configured.
+    Use the value `NONE` to indicate that no suffix should be
+    appended.)
 
 * explicitOrderings
 

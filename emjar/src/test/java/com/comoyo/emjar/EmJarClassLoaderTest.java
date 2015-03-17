@@ -19,13 +19,17 @@ package com.comoyo.emjar;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.Properties;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -57,12 +61,49 @@ public class EmJarClassLoaderTest extends EmJarTest
         return new EmJarClassLoader(props);
     }
 
+    /**
+     * In order to construct a URL, getResourceAsStream ultimately
+     * calls sun.net.www.ParseUtil.encodePath().  This encodes the
+     * name's char array to UTF-8 under the assumption that it is
+     * UCS-2, not UTF-16.  Doing so causes bad encodings of non-BMP
+     * entities.  Java 7 was able to process these wrongly encoded
+     * strings and reconstruct the original char sequence, but Java 8
+     * is not.  Thus the following, which more or less replicates the
+     * functionality of getResourceAsStream in order to verify that at
+     * least EmJar's handling of unicode is up to snuff.
+     */
+    private static InputStream getResourceAsStreamRobust(
+            final URLClassLoader loader, final String searchName)
+            throws IOException {
+        for (final URL url : loader.getURLs()) {
+            if (!"jar".equals(url.getProtocol())) {
+                continue;
+            }
+            final URLConnection conn = url.openConnection();
+            if (!(conn instanceof JarURLConnection)) {
+                continue;
+            }
+            final JarURLConnection jarConn = (JarURLConnection) conn;
+            final JarFile jarFile = jarConn.getJarFile();
+            final Enumeration<JarEntry> it = jarFile.entries();
+            while (it.hasMoreElements()) {
+                final JarEntry je = it.nextElement();
+                if (searchName.equals(je.getName())) {
+                    return jarFile.getInputStream(je);
+                }
+            }
+        }
+        return null;
+    }
+
     @Test
     public void testClassPathQuoting()
         throws Exception
     {
         final EmJarClassLoader loader = testLoader();
-        final InputStream is = loader.getResourceAsStream("entry-" + WEIRD + ".txt");
+        final String searchName = "entry-" + WEIRD + ".txt";
+        final InputStream is = getResourceAsStreamRobust(loader, searchName);
+        assertNotNull("Did not find " + searchName + "  in classpath", is);
         final BufferedReader entry = new BufferedReader(new InputStreamReader(is));
         assertEquals("Contents mismatch for weird entry", WEIRD, entry.readLine());
     }
