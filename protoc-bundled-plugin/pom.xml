@@ -5,7 +5,7 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>com.comoyo</groupId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4.50</version>
   </parent>
 
   <groupId>com.comoyo.maven.plugins</groupId>
