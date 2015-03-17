@@ -78,9 +78,6 @@ public class EmJarClassLoader
 
     public final static String SEPARATOR = "!/";
 
-    private final static HandlerFactory factory = new HandlerFactory();
-    private final static Handler handler = new Handler();
-
     static {
         try {
             ClassLoader.registerAsParallelCapable();
@@ -89,22 +86,27 @@ public class EmJarClassLoader
         }
     }
 
+    private EmJarClassLoader(
+            final Handler handler, final Properties props, final ClassLoader parent) {
+        super(getClassPath(props, handler), parent, new HandlerFactory(handler));
+    }
+
     public EmJarClassLoader()
     {
-        super(getClassPath(System.getProperties()), null, factory);
+        this(new Handler(), System.getProperties(), null);
     }
 
-    public EmJarClassLoader(ClassLoader parent)
+    public EmJarClassLoader(final ClassLoader parent)
     {
-        super(getClassPath(System.getProperties()), parent, factory);
+        this(new Handler(), System.getProperties(), parent);
     }
 
-    protected EmJarClassLoader(Properties props)
+    protected EmJarClassLoader(final Properties props)
     {
-        super(getClassPath(props), null, factory);
+        this(new Handler(), props, null);
     }
 
-    private static URL[] getClassPath(final Properties props)
+    private static URL[] getClassPath(final Properties props, final Handler handler)
     {
         final String classPath = props.getProperty("java.class.path");
         QUIET = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_QUIET_PROP, ""));
@@ -160,16 +162,15 @@ public class EmJarClassLoader
             handler);
     }
 
-    @Override
-    public Class<?> loadClass(String name)
-        throws ClassNotFoundException
-    {
-        return super.loadClass(name);
-    }
-
     private static class HandlerFactory
         implements URLStreamHandlerFactory
     {
+        private final Handler handler;
+
+        public HandlerFactory(final Handler handler) {
+            this.handler = handler;
+        }
+
         @Override
         public URLStreamHandler createURLStreamHandler(String protocol)
         {
