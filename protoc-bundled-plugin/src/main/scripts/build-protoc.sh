@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# Note: Cross compiling to 32 bit on ubuntu x86_64 requires g++-multilib and libz-dev:i386
+# Notes:
+# Static builds in fedora requires glibc-static, libstdc++-static and zlib-static.
+# Cross compiling to 32 bit on fedora x86_64 requires gcc-c++.i686
+# glibc-static.i686 libstdc++-static.i686 and zlib-static.i686
+# libgcc.i686 glibc-devel.i686 libstdc++-devel.i686.
+# Cross compiling to 32 bit on ubuntu x86_64 requires g++-multilib and libz-dev:i386.
 
-ver=${1:-2.4.1}
+ver=${1:-2.6.1}
 host=$(uname -s -m | tr 'A-Z ' 'a-z-' | sed 's/darwin/mac_os_x/')
 
 build() {
@@ -14,7 +19,7 @@ build() {
     # local makeopts="LDFLAGS=-static-libgcc CXXFLAGS=-static-libstdc++" # Quite static
 
     echo Building protoc $ver for $sys
-    wget -nc http://protobuf.googlecode.com/files/protobuf-$ver.tar.bz2
+    wget -nc https://github.com/google/protobuf/releases/download/v$ver/protobuf-$ver.tar.bz2
     rm -rf "$build" "$inst"
     mkdir -p "$build"
     tar -C "$build" -jxf protobuf-$ver.tar.bz2
