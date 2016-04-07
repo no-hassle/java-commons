@@ -195,6 +195,28 @@
                   <type>exe</type>
                   <classifier>2.6.1-win32-x86</classifier>
                 </artifact>
+
+		<!-- 3.0.0-beta-2 -->
+                <artifact>
+                  <file>src/main/binaries/3.0.0-beta-2/protoc-3.0.0-beta-2-linux-x86</file>
+                  <type>exe</type>
+                  <classifier>3.0.0-beta-2-linux-x86</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/3.0.0-beta-2/protoc-3.0.0-beta-2-linux-x86_64</file>
+                  <type>exe</type>
+                  <classifier>3.0.0-beta-2-linux-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/3.0.0-beta-2/protoc-3.0.0-beta-2-mac_os_x-x86_64</file>
+                  <type>exe</type>
+                  <classifier>3.0.0-beta-2-mac_os_x-x86_64</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/main/binaries/3.0.0-beta-2/protoc-3.0.0-beta-2-win32-x86.exe</file>
+                  <type>exe</type>
+                  <classifier>3.0.0-beta-2-win32-x86</classifier>
+                </artifact>
               </artifacts>
             </configuration>
           </execution>
