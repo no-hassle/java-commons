@@ -86,6 +86,7 @@ import java.util.List;
  * @goal run
  * @phase generate-sources
  * @requiresDependencyResolution
+ * @threadSafe
  */
 
 public class ProtocBundledMojo extends AbstractMojo
@@ -243,7 +244,7 @@ public class ProtocBundledMojo extends AbstractMojo
      *
      * @param protocName   protoc specifier
      */
-    private File resolveProtocArtifact(String protocName)
+    private synchronized File resolveProtocArtifact(String protocName)
         throws MojoExecutionException
     {
         Artifact artifact
