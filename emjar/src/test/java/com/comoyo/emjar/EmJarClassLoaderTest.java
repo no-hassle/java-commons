@@ -40,6 +40,7 @@ import org.junit.runners.JUnit4;
 import com.google.common.base.Joiner;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 @RunWith(JUnit4.class)
 public class EmJarClassLoaderTest extends EmJarTest
@@ -100,6 +101,7 @@ public class EmJarClassLoaderTest extends EmJarTest
     public void testClassPathQuoting()
         throws Exception
     {
+        assumeTrue("UTF-8".equals(System.getProperty("file.encoding")));
         final EmJarClassLoader loader = testLoader();
         final String searchName = "entry-" + WEIRD + ".txt";
         final InputStream is = getResourceAsStreamRobust(loader, searchName);
