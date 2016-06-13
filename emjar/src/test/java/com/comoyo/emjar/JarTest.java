@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 @RunWith(JUnit4.class)
 public abstract class JarTest extends EmJarTest
@@ -75,6 +76,7 @@ public abstract class JarTest extends EmJarTest
     public void testQuoting()
         throws Exception
     {
+        assumeTrue("UTF-8".equals(System.getProperty("file.encoding")));
         testJarBundle(WEIRD);
     }
 }
