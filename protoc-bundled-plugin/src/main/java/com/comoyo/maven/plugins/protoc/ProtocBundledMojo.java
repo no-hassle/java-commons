@@ -180,7 +180,15 @@ public class ProtocBundledMojo extends AbstractMojo
      */
     private File protocExec;
 
-
+    /*
+     * A global static lock to disallow concurrent download and more
+     * importantly concurrent write of the protoc compiler when the plugin
+     * is called multiple times in parallel.
+     * <p>
+     * This is a workaround for a bug in Maven versions <= 3.2.3.
+     */
+    private static final Object protocDownloadLock = new Object();
+    
     private static final Map<String, String> osNamePrefix = new HashMap<String, String>();
     private static final Map<String, String> osArchCanon = new HashMap<String, String>();
     static {
@@ -244,7 +252,7 @@ public class ProtocBundledMojo extends AbstractMojo
      *
      * @param protocName   protoc specifier
      */
-    private synchronized File resolveProtocArtifact(String protocName)
+    private File resolveProtocArtifact(String protocName)
         throws MojoExecutionException
     {
         Artifact artifact
@@ -258,7 +266,10 @@ public class ProtocBundledMojo extends AbstractMojo
         ArtifactResolutionRequest request = new ArtifactResolutionRequest()
             .setArtifact(artifact)
             .setRemoteRepositories(remoteRepositories);
-        ArtifactResolutionResult result = repositorySystem.resolve(request);
+        ArtifactResolutionResult result;
+        synchronized (protocDownloadLock) {
+            result = repositorySystem.resolve(request);
+        }
         if (!result.isSuccess()) {
             throw new MojoExecutionException(
                 "Unable to resolve dependency on protoc binary artifact, sorry: "
