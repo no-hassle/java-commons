@@ -8,7 +8,7 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>com.comoyo</groupId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4.56</version>
   </parent>
 
   <name>pb-json - Tools for working with Protobuf and Json</name>
@@ -41,7 +41,7 @@
       <plugin>
         <groupId>com.comoyo.maven.plugins</groupId>
         <artifactId>protoc-bundled-plugin</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.4.56</version>
         <executions>
           <execution>
             <goals>

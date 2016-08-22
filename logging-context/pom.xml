@@ -8,7 +8,7 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>com.comoyo</groupId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4.56</version>
   </parent>
 
   <name>logging-context - Tools for logging with context</name>
