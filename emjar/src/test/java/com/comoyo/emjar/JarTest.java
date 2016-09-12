@@ -46,6 +46,8 @@ public abstract class JarTest extends EmJarTest
             = new BufferedReader(new InputStreamReader(
                                      jar.getInputStream(new JarEntry("entry-" + name + ".txt"))));
         assertEquals("Contents mismatch for " + name, name, entry.readLine());
+        final JarEntry dirEntry = jar.getJarEntry("dir-entry");
+        assertNotNull("Entry for directory was not found", dirEntry);
         return jar;
     }
 
