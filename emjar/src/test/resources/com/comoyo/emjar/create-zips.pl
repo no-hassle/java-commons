@@ -25,6 +25,8 @@ sub createZip {
 		      Name => "entry-$name.txt",
 		      Time => $TIMESTAMP + 3,
 		      %$entryargs);
+    $inner->add("dir-entry",
+		Stream => 0);
     $inner->close();
 
     my $outer = Archive::Zip::SimpleZip->new("bundle-$name.jar", %$initargs)
@@ -39,6 +41,9 @@ sub createZip {
     $outer->close();
 }
 
+mkdir("dir-entry");
+utime($TIMESTAMP + 6, $TIMESTAMP + 6, "dir-entry");
+
 for my $m (0, 1) {
     for my $s (0, 1) {
 	for my $l (0, 1) {
@@ -52,7 +57,10 @@ for my $m (0, 1) {
 	}
     }
 }
+
 createZip("s-large", {Stream => 0}, {}, 1);
 createZip("S-large", {Stream => 1}, {}, 1);
 createZip("Z-large", {}, {}, 1, ZIP_CM_DEFLATE);
 createZip("æøå😱 %&;*+`\"\\-weird", {}, {});
+
+rmdir("dir-entry");

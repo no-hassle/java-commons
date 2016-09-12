@@ -167,7 +167,7 @@ public class ZipScanner
             final int startDiskNum = dir.getShort(pos + ZipFile.CENDSK);
             final int headerOffs = dir.getInt(pos + ZipFile.CENOFF);
             if (nameLen > buf.length) {
-                buf = new byte[buf.length * 2];
+                buf = new byte[nameLen];
             }
             dir.position(pos + ZipFile.CENHDR);
             dir.get(buf, 0, nameLen);

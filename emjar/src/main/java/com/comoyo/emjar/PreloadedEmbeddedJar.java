@@ -178,7 +178,8 @@ public class PreloadedEmbeddedJar
 
         @Override
         public JarEntry	getJarEntry(String name) {
-            return entries.get(name);
+            final JarEntry entry = entries.get(name);
+            return entry != null ? entry : entries.get(name + "/");
         }
 
         @Override
