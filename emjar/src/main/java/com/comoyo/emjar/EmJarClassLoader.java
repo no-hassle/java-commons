@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.io.File;
 import java.io.IOException;
 
@@ -56,6 +57,16 @@ import java.io.IOException;
  * must for obvious reasons be stored directly inside the bundle jar;
  * i.e not within an embedded jar.)
  *
+ * <p/>
+ * All jars given as part of the classpath will be recursively
+ * inspected for embedded jars, and these will in turn be added to the
+ * classpath.  Jar files on the classpath having manifests declaring
+ * <strong><code>Premain-Class:</code></strong> (i.e Java Agent jars)
+ * will not be inspected by default, but can be added to the
+ * EmJar-specific classpath contained in the
+ * <strong><code>emjar.class.path</code></strong> property if this is
+ * desired.
+
  * <p/>
  * For a less manual approach that embeds all configuration in the
  * bundled jar, see {@link Boot}.
@@ -115,8 +126,8 @@ public class EmJarClassLoader
         DEBUG = "true".equalsIgnoreCase(props.getProperty(EMJAR_LOG_DEBUG_PROP, ""));
 
         final ArrayList<URL> urls = new ArrayList<>();
-        addClassPathUrls(props.getProperty(JAVA_CLASS_PATH_PROP), urls, handler);
-        addClassPathUrls(props.getProperty(EMJAR_CLASS_PATH_PROP), urls, handler);
+        addClassPathUrls(props.getProperty(JAVA_CLASS_PATH_PROP), urls, handler, false);
+        addClassPathUrls(props.getProperty(EMJAR_CLASS_PATH_PROP), urls, handler, true);
         if (DEBUG) {
             System.err.println("EmJar: using classpath " + urls);
         }
@@ -124,7 +135,10 @@ public class EmJarClassLoader
     }
 
     private static void addClassPathUrls(
-            final String classPath, final List<URL> urls, final Handler handler) {
+            final String classPath,
+            final List<URL> urls,
+            final Handler handler,
+            final boolean force) {
         if (classPath == null) {
             return;
         }
@@ -136,6 +150,15 @@ public class EmJarClassLoader
                     continue;
                 }
                 final JarFile jar = new JarFile(file);
+                final Manifest mf = jar.getManifest();
+                if (mf != null) {
+                    if ((mf.getMainAttributes().getValue("Premain-Class") != null) && !force) {
+                        if (DEBUG) {
+                            System.err.println("EmJar: skipping java agent jar: " + elem);
+                        }
+                        continue;
+                    }
+                }
                 final Enumeration<JarEntry> embedded = jar.entries();
                 while (embedded.hasMoreElements()) {
                     final JarEntry entry = embedded.nextElement();
