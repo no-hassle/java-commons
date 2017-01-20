@@ -78,6 +78,7 @@
     <module>logging-utilities</module>
     <module>emjar</module>
     <module>emjar-maven-plugin</module>
+    <module>emjar-demo</module>
   </modules>
 
   <build>
@@ -207,6 +208,19 @@
   <profiles>
     <profile>
       <id>release</id>
+
+      <modules>
+        <module>pb-json</module>
+        <module>protoc-bundled-plugin</module>
+        <module>amazonaws-utils</module>
+        <module>logging-context</module>
+        <module>logging-context-gelf</module>
+        <module>logging-context-json</module>
+        <module>logging-utilities</module>
+        <module>emjar</module>
+        <module>emjar-maven-plugin</module>
+      </modules>
+
       <build>
         <plugins>
           <plugin>
