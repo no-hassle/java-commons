@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extensions>
+  <extension>
+    <groupId>io.tesla.profile</groupId>
+    <artifactId>tesla-profiler</artifactId>
+    <version>0.0.3</version>
+  </extension>
+</extensions>
+

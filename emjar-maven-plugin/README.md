@@ -50,7 +50,7 @@ Maven Plugin Mojo for building bundling jars that contain dependency artifact ja
   <plugin>
     <groupId>com.comoyo.commons</groupId>
     <artifactId>emjar-maven-plugin</artifactId>
-    <version>1.4.46</version>
+    <version>1.4.59</version>
     <executions>
       <execution>
         <goals>

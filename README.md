@@ -16,3 +16,4 @@ The list of components currently reads as follows:
 * [protoc-bundled-plugin](protoc-bundled-plugin) Batteries included Protobuf compiler plugin for Maven
 * [emjar](emjar) Class loader and supporting cast for using jar-in-jar embedded archives as part of classpath
 * [emjar-maven-plugin](emjar-maven-plugin) Generate EmJar-enabled bundle archives from Maven
+* [emjar-demo](emjar-demo) EmJar alternatives overview
