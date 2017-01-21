@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
@@ -57,10 +58,15 @@ public class Boot
     public final static String EMJAR_SYSTEM_PROPS_ATTR = "EmJar-System-Properties";
 
     public static void main(String[] args)
-        throws Exception
+        throws Throwable
     {
         final Method mainMethod = findMain(System.getProperties());
-        mainMethod.invoke(null, new Object[]{args});
+        try {
+            mainMethod.invoke(null, new Object[]{args});
+        } catch (final InvocationTargetException err) {
+            final Throwable cause = err.getCause();
+            throw cause == null ? err : cause;
+        }
     }
 
     public static Method findMain(Properties props)
