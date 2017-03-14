@@ -81,7 +81,7 @@ public class ZipScanner
         return nestedDescriptors;
     }
 
-    public void recurse(
+    public boolean recurse(
         final ByteBuffer map,
         final Map<String, OndemandEmbeddedJar.Descriptor> context)
         throws IOException
@@ -118,8 +118,7 @@ public class ZipScanner
             if (endOff > Integer.MAX_VALUE) {
                 throw new IOException("Unexpected oversize offset value");
             }
-            parseDirectory(map, (int) endOff, (int) endSiz, context);
-            return;
+            return parseDirectory(map, (int) endOff, (int) endSiz, context);
         }
         final ByteBuffer eocd = findEocd(map, ZipFile.ENDSIG, ZipFile.ENDHDR);
         if (eocd != null) {
@@ -134,19 +133,20 @@ public class ZipScanner
             if (curDiskNum != 0 || cdStartDisk != 0 || cdRecsHere != cdRecsTotal) {
                 throw new IOException("Split archives not supported");
             }
-            parseDirectory(map, cdOffs, cdSize, context);
-            return;
+            return parseDirectory(map, cdOffs, cdSize, context);
         }
         throw new IOException("EOCD signature not found");
     }
 
-    private void parseDirectory(
+    private boolean parseDirectory(
         final ByteBuffer map,
         final int offset,
         final int size,
         final Map<String, OndemandEmbeddedJar.Descriptor> context)
         throws IOException
     {
+        boolean ondemandPossible = true;
+
         map.position(offset);
         final ByteBuffer dir = map.slice();
         dir.limit(size);
@@ -181,16 +181,22 @@ public class ZipScanner
             if (method == METHOD_STORED && name.endsWith(".jar")) {
                 final Map<String, OndemandEmbeddedJar.Descriptor> descriptors
                     = new HashMap<>(16);
-                parseFile(map.slice(), descriptors, compressedSize);
-                nestedDescriptors.put(name, descriptors);
+                if (parseFile(map.slice(), descriptors, compressedSize)) {
+                    nestedDescriptors.put(name, descriptors);
+                }
+            }
+            if (name.startsWith("META-INF/")
+                    && (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA"))) {
+                ondemandPossible = false;
             }
             if (context != null) {
                 context.put(name, new OndemandEmbeddedJar.Descriptor(name, map, headerOffs, originalSize));
             }
         }
+        return ondemandPossible;
     }
 
-    private void parseFile(
+    private boolean parseFile(
         final ByteBuffer map,
         final Map<String, OndemandEmbeddedJar.Descriptor> context,
         final int compressedSize)
@@ -200,14 +206,14 @@ public class ZipScanner
         final int pos = map.position();
         final int sig = map.getInt(pos);
         if (sig != ZipFile.LOCSIG) {
-            return;
+            return false;
         }
         final int nameLen = map.getShort(pos + ZipFile.LOCNAM);
         final int extraLen = map.getShort(pos + ZipFile.LOCEXT);
         map.position(pos + ZipFile.LOCHDR + nameLen + extraLen);
         final ByteBuffer nested = map.slice();
         nested.limit(compressedSize);
-        recurse(nested, context);
+        return recurse(nested, context);
     }
 
     private ByteBuffer findEocd(

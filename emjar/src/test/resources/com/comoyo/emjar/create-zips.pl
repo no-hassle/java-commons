@@ -62,5 +62,14 @@ createZip("s-large", {Stream => 0}, {}, 1);
 createZip("S-large", {Stream => 1}, {}, 1);
 createZip("Z-large", {}, {}, 1, ZIP_CM_DEFLATE);
 createZip("æøå😱 %&;*+`\"\\-weird", {}, {});
+createZip("signed", {}, {});
 
 rmdir("dir-entry");
+
+### Creating the signed example is manual process at this point:
+# unzip bundle-signed.jar lib-signed.jar
+# rm bundle-signed.jar
+# keytool -genkey -keyalg RSA -alias testkey -keystore teststore -validity 36524 -storepass password
+# jarsigner -keystore teststore -storepass password -verbose lib-signed.jar testkey
+# jar -c0f bundle-signed.jar lib-signed.jar
+# rm teststore lib-signed.jar

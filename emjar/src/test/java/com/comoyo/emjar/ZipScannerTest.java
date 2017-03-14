@@ -17,7 +17,10 @@
 package com.comoyo.emjar;
 
 import java.io.File;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +30,22 @@ import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class ZipScannerTest
-    extends EmJarTest
+    extends JarTest
 {
+    @Override
+    public JarURLConnection getJarUrlConnection(File root, String jarName, String entryName)
+        throws Exception
+    {
+        final ZipScanner scanner = new ZipScanner(root);
+        final Map<String, Map<String, OndemandEmbeddedJar.Descriptor>> desc
+            = scanner.scan();
+        final Map<String, OndemandEmbeddedJar.Descriptor> embedded
+            = desc.get(jarName);
+        assertNotNull("Descriptor entry for " + jarName + " was null", embedded);
+        final URL rootUrl = new URL("jar:file:" + root.toString() + "!/");
+        return new OndemandEmbeddedJar.Connection(rootUrl, root.toString(), embedded, entryName);
+    }
+
     @Test
     public void testCompressedBundle()
         throws Exception

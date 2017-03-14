@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.jar.JarEntry;
@@ -43,7 +44,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
 @RunWith(JUnit4.class)
-public class EmJarClassLoaderTest extends EmJarTest
+public class EmJarClassLoaderTest extends JarTest
 {
     private EmJarClassLoader testLoader()
         throws URISyntaxException
@@ -97,6 +98,23 @@ public class EmJarClassLoaderTest extends EmJarTest
         return null;
     }
 
+    @Override
+    public JarURLConnection getJarUrlConnection(File root, String jarName, String entryName)
+        throws Exception
+    {
+        final Properties props = new Properties();
+        props.setProperty("java.class.path", root.toString());
+        final URLClassLoader loader = new EmJarClassLoader(props);
+        final URL url = loader.findResource(entryName);
+        assertNotNull("Entry " + entryName + " not found using " + root.toString(), url);
+        final JarURLConnection conn = (JarURLConnection) url.openConnection();
+        if (!jarName.equals("lib-signed.jar")) {
+            assertEquals("Connection returned from load was not Ondemand",
+                OndemandEmbeddedJar.Connection.class, conn.getClass());
+        }
+        return conn;
+    }
+
     @Test
     public void testClassPathQuoting()
         throws Exception
@@ -131,5 +149,21 @@ public class EmJarClassLoaderTest extends EmJarTest
             }
         }
         fail("Did not find any elements in classpath with protocol jar");
+    }
+
+    @Test
+    public void testBundleWithSignedContents()
+        throws Exception
+    {
+        final JarURLConnection conn = getJarUrlConnection(
+                getResourceFile("bundle-signed.jar"), "lib-signed.jar", "entry-signed.txt");
+        final JarFile jar = conn.getJarFile();
+        final JarEntry entry = jar.getJarEntry("entry-signed.txt");
+        final Certificate[] certs = entry.getCertificates();
+        assertNotNull("No certificates found for signed entry", certs);
+        assertEquals("Unexpected number of certificates for signed entry",
+                1, certs.length);
+        assertEquals("Supplied certificate was of unexpected type",
+                "X.509", certs[0].getType());
     }
 }
