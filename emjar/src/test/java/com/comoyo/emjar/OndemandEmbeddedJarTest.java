@@ -34,6 +34,7 @@ import static org.junit.Assert.*;
 public class OndemandEmbeddedJarTest
     extends JarTest
 {
+    @Override
     public JarURLConnection getJarUrlConnection(File root, String jarName, String entryName)
         throws Exception
     {

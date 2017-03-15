@@ -23,20 +23,22 @@ and test runs of all the different alternatives; a time usage summary
 will be presented at the end of the run. (Be aware that some of the
 packaging executions share dependencies, which will favour the
 executions being run after the dependency has already been resolved.
-For accurate timing results, profile one alternative at a time.)
+For accurate timing results, profile one alternative at a time.)  To
+run the integration tests under a non-default JRE, specify
+`-Djava.executable=.../bin/java` to indicate a different Java runtime.
 
 One of the challenges with multiple jars embedded in a single jar is
 to make sure all references to per-jar META-INF information is handled
 correctly -- pay attention to the jetty version string in the example
 runs to see what happens when this fails.
 
-Tool                 | Classpath scanning       | META-INF separation
----------------------|--------------------------|-------------------------
-Maven Shade          | :heavy_check_mark:       | :heavy_exclamation_mark:
-One-JAR              | :heavy_exclamation_mark: | :heavy_check_mark:
-Spring Boot          | :heavy_exclamation_mark: | :heavy_check_mark:
-Eclipse Runnable Jar | :heavy_exclamation_mark: | :heavy_exclamation_mark:
-EmJar                | :heavy_check_mark:       | :heavy_check_mark:
+Tool                 | Classpath scanning       | META-INF separation      | Signed embedded dependencies
+---------------------|--------------------------|--------------------------|-----------------------------
+Maven Shade          | :heavy_check_mark:       | :heavy_exclamation_mark: | :heavy_exclamation_mark:
+One-JAR              | :heavy_exclamation_mark: | :heavy_check_mark:       | :heavy_check_mark:
+Spring Boot          | :heavy_exclamation_mark: | :heavy_check_mark:       | :heavy_check_mark:
+Eclipse Runnable Jar | :heavy_exclamation_mark: | :heavy_exclamation_mark: | :heavy_check_mark:
+EmJar                | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:
 
 With large dependency sets, packaging and execution time will also
 tend to differ betweem the tools. The following is a rough sample of
@@ -59,132 +61,133 @@ by the different tools under different circumstances:
 
 ```
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-bare-1) @ emjar-demo ---
-jan 22, 2017 12:27:47 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:27:47.243:INFO::main: Logging initialized @219ms
-2017-01-22 00:27:47.326:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:47.933:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@383dc82c{/,null,AVAILABLE}
-2017-01-22 00:27:47.947:INFO:oejs.AbstractConnector:main: Started ServerConnector@222a59e6{HTTP/1.1,[http/1.1]}{0.0.0.0:43131}
-2017-01-22 00:27:47.948:INFO:oejs.Server:main: Started @924ms
-jan 22, 2017 12:27:48 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:48 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:48 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:48.356:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@222a59e6{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:48.360:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@383dc82c{/,null,UNAVAILABLE}
+  bare [INFO] Running test (explicit registration)
+  bare [INFO] BouncyCastle security provider loaded successfully
+  bare [INFO] Logging initialized @695ms
+  bare [INFO] jetty-9.3.15.v20161220
+  bare [INFO] Started o.e.j.s.ServletContextHandler@56f521c6{/,null,AVAILABLE}
+  bare [INFO] Started ServerConnector@3f9f71ff{HTTP/1.1,[http/1.1]}{0.0.0.0:45413}
+  bare [INFO] Started @1175ms
+  bare [INFO] Html: <html><body><h1>OK</h1></body></html>
+  bare [INFO] Json: {"key":"value"}
+  bare [INFO] Xml: <HashMap><key>value</key></HashMap>
+  bare [INFO] Stopped ServerConnector@3f9f71ff{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  bare [INFO] Stopped o.e.j.s.ServletContextHandler@56f521c6{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-bare-2) @ emjar-demo ---
-jan 22, 2017 12:27:48 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
-2017-01-22 00:27:48.659:INFO::main: Logging initialized @217ms
-2017-01-22 00:27:48.738:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:49.421:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@4c2bb6e0{/,null,AVAILABLE}
-2017-01-22 00:27:49.435:INFO:oejs.AbstractConnector:main: Started ServerConnector@51bf5add{HTTP/1.1,[http/1.1]}{0.0.0.0:40459}
-2017-01-22 00:27:49.436:INFO:oejs.Server:main: Started @994ms
-jan 22, 2017 12:27:49 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:49 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:49 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:49.809:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@51bf5add{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:49.815:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@4c2bb6e0{/,null,UNAVAILABLE}
+  bare [INFO] Running test (classpath scanning)
+  bare [INFO] BouncyCastle security provider loaded successfully
+  bare [INFO] Logging initialized @721ms
+  bare [INFO] jetty-9.3.15.v20161220
+  bare [INFO] Started o.e.j.s.ServletContextHandler@4422dd48{/,null,AVAILABLE}
+  bare [INFO] Started ServerConnector@618ad2aa{HTTP/1.1,[http/1.1]}{0.0.0.0:33847}
+  bare [INFO] Started @1220ms
+  bare [INFO] Html: <html><body><h1>OK</h1></body></html>
+  bare [INFO] Json: {"key":"value"}
+  bare [INFO] Xml: <HashMap><key>value</key></HashMap>
+  bare [INFO] Stopped ServerConnector@618ad2aa{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  bare [INFO] Stopped o.e.j.s.ServletContextHandler@4422dd48{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-emjar-1) @ emjar-demo ---
-jan 22, 2017 12:27:50 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:27:50.232:INFO::main: Logging initialized @276ms
-2017-01-22 00:27:50.313:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:50.899:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@3632be31{/,null,AVAILABLE}
-2017-01-22 00:27:50.911:INFO:oejs.AbstractConnector:main: Started ServerConnector@67784306{HTTP/1.1,[http/1.1]}{0.0.0.0:40613}
-2017-01-22 00:27:50.912:INFO:oejs.Server:main: Started @956ms
-jan 22, 2017 12:27:51 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:51 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:51 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:51.351:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@67784306{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:51.357:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@3632be31{/,null,UNAVAILABLE}
+  emjar [INFO] Running test (explicit registration)
+  emjar [INFO] BouncyCastle security provider loaded successfully
+  emjar [INFO] Logging initialized @643ms
+  emjar [INFO] jetty-9.3.15.v20161220
+  emjar [INFO] Started o.e.j.s.ServletContextHandler@6c49835d{/,null,AVAILABLE}
+  emjar [INFO] Started ServerConnector@71bbf57e{HTTP/1.1,[http/1.1]}{0.0.0.0:39521}
+  emjar [INFO] Started @1149ms
+  emjar [INFO] Html: <html><body><h1>OK</h1></body></html>
+  emjar [INFO] Json: {"key":"value"}
+  emjar [INFO] Xml: <HashMap><key>value</key></HashMap>
+  emjar [INFO] Stopped ServerConnector@71bbf57e{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  emjar [INFO] Stopped o.e.j.s.ServletContextHandler@6c49835d{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-emjar-2) @ emjar-demo ---
-jan 22, 2017 12:27:51 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
-2017-01-22 00:27:51.754:INFO::main: Logging initialized @293ms
-2017-01-22 00:27:51.830:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:52.445:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@2286778{/,null,AVAILABLE}
-2017-01-22 00:27:52.470:INFO:oejs.AbstractConnector:main: Started ServerConnector@210366b4{HTTP/1.1,[http/1.1]}{0.0.0.0:43725}
-2017-01-22 00:27:52.470:INFO:oejs.Server:main: Started @1010ms
-jan 22, 2017 12:27:52 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:52 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:52 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:52.880:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@210366b4{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:52.886:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@2286778{/,null,UNAVAILABLE}
+  emjar [INFO] Running test (classpath scanning)
+  emjar [INFO] BouncyCastle security provider loaded successfully
+  emjar [INFO] Logging initialized @617ms
+  emjar [INFO] jetty-9.3.15.v20161220
+  emjar [INFO] Started o.e.j.s.ServletContextHandler@67205a84{/,null,AVAILABLE}
+  emjar [INFO] Started ServerConnector@51cdd8a{HTTP/1.1,[http/1.1]}{0.0.0.0:32967}
+  emjar [INFO] Started @1075ms
+  emjar [INFO] Html: <html><body><h1>OK</h1></body></html>
+  emjar [INFO] Json: {"key":"value"}
+  emjar [INFO] Xml: <HashMap><key>value</key></HashMap>
+  emjar [INFO] Stopped ServerConnector@51cdd8a{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  emjar [INFO] Stopped o.e.j.s.ServletContextHandler@67205a84{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-shade-1) @ emjar-demo ---
-jan 22, 2017 12:27:53 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:27:53.351:INFO::main: Logging initialized @387ms
-2017-01-22 00:27:53.412:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
-2017-01-22 00:27:54.011:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@5745ca0e{/,null,AVAILABLE}
-2017-01-22 00:27:54.023:INFO:oejs.AbstractConnector:main: Started ServerConnector@6a8658ff{HTTP/1.1,[http/1.1]}{0.0.0.0:39507}
-2017-01-22 00:27:54.024:INFO:oejs.Server:main: Started @1060ms
-jan 22, 2017 12:27:54 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:54 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:54 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:54.417:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@6a8658ff{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:54.421:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@5745ca0e{/,null,UNAVAILABLE}
+  shade [INFO] Running test (explicit registration)
+java.security.NoSuchProviderException: JCE cannot authenticate the provider BC
+        at javax.crypto.JceSecurity.getInstance(JceSecurity.java:100)
+        at javax.crypto.KeyAgreement.getInstance(KeyAgreement.java:230)
+        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
+Caused by: java.util.jar.JarException: file:/home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
+        at javax.crypto.JarVerifier.verifySingleJar(JarVerifier.java:500)
+        at javax.crypto.JarVerifier.verifyJars(JarVerifier.java:361)
+        at javax.crypto.JarVerifier.verify(JarVerifier.java:289)
+        at javax.crypto.JceSecurity.verifyProviderJar(JceSecurity.java:159)
+        at javax.crypto.JceSecurity.getVerificationResult(JceSecurity.java:185)
+        at javax.crypto.JceSecurity.getInstance(JceSecurity.java:97)
+        ... 2 more
+  shade [INFO] Logging initialized @574ms
+  shade [INFO] jetty-9.3.z-SNAPSHOT
+  shade [INFO] Started o.e.j.s.ServletContextHandler@3a48c398{/,null,AVAILABLE}
+  shade [INFO] Started ServerConnector@5d22604e{HTTP/1.1,[http/1.1]}{0.0.0.0:35979}
+  shade [INFO] Started @1059ms
+  shade [INFO] Html: <html><body><h1>OK</h1></body></html>
+  shade [INFO] Json: {"key":"value"}
+  shade [INFO] Xml: <HashMap><key>value</key></HashMap>
+  shade [INFO] Stopped ServerConnector@5d22604e{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  shade [INFO] Stopped o.e.j.s.ServletContextHandler@3a48c398{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-shade-2) @ emjar-demo ---
-jan 22, 2017 12:27:54 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
-2017-01-22 00:27:54.630:INFO::main: Logging initialized @161ms
-2017-01-22 00:27:54.685:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
-2017-01-22 00:27:55.558:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@333d4a8c{/,null,AVAILABLE}
-2017-01-22 00:27:55.571:INFO:oejs.AbstractConnector:main: Started ServerConnector@516f41d9{HTTP/1.1,[http/1.1]}{0.0.0.0:35899}
-2017-01-22 00:27:55.572:INFO:oejs.Server:main: Started @1103ms
-jan 22, 2017 12:27:55 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:55 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:55 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:55.940:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@516f41d9{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:55.944:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@333d4a8c{/,null,UNAVAILABLE}
+  shade [INFO] Running test (classpath scanning)
+java.security.NoSuchProviderException: JCE cannot authenticate the provider BC
+        at javax.crypto.JceSecurity.getInstance(JceSecurity.java:100)
+        at javax.crypto.KeyAgreement.getInstance(KeyAgreement.java:230)
+        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
+Caused by: java.util.jar.JarException: file:/home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
+        at javax.crypto.JarVerifier.verifySingleJar(JarVerifier.java:500)
+        at javax.crypto.JarVerifier.verifyJars(JarVerifier.java:361)
+        at javax.crypto.JarVerifier.verify(JarVerifier.java:289)
+        at javax.crypto.JceSecurity.verifyProviderJar(JceSecurity.java:159)
+        at javax.crypto.JceSecurity.getVerificationResult(JceSecurity.java:185)
+        at javax.crypto.JceSecurity.getInstance(JceSecurity.java:97)
+        ... 2 more
+  shade [INFO] Logging initialized @580ms
+  shade [INFO] jetty-9.3.z-SNAPSHOT
+  shade [INFO] Started o.e.j.s.ServletContextHandler@3f1d6a13{/,null,AVAILABLE}
+  shade [INFO] Started ServerConnector@3f64d943{HTTP/1.1,[http/1.1]}{0.0.0.0:44305}
+  shade [INFO] Started @1340ms
+  shade [INFO] Html: <html><body><h1>OK</h1></body></html>
+  shade [INFO] Json: {"key":"value"}
+  shade [INFO] Xml: <HashMap><key>value</key></HashMap>
+  shade [INFO] Stopped ServerConnector@3f64d943{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  shade [INFO] Stopped o.e.j.s.ServletContextHandler@3f1d6a13{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-onejar-1) @ emjar-demo ---
-jan 22, 2017 12:27:56 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:27:56.873:INFO::main: Logging initialized @901ms
-2017-01-22 00:27:56.925:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:57.475:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@67784306{/,null,AVAILABLE}
-2017-01-22 00:27:57.487:INFO:oejs.AbstractConnector:main: Started ServerConnector@2b9627bc{HTTP/1.1,[http/1.1]}{0.0.0.0:46543}
-2017-01-22 00:27:57.488:INFO:oejs.Server:main: Started @1515ms
-jan 22, 2017 12:27:57 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:27:57 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:27:57 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:27:57.811:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@2b9627bc{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:57.815:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@67784306{/,null,UNAVAILABLE}
+  onejar [INFO] Running test (explicit registration)
+  onejar [INFO] BouncyCastle security provider loaded successfully
+  onejar [INFO] Logging initialized @1114ms
+  onejar [INFO] jetty-9.3.15.v20161220
+  onejar [INFO] Started o.e.j.s.ServletContextHandler@3fcdcf{/,null,AVAILABLE}
+  onejar [INFO] Started ServerConnector@1db0ec27{HTTP/1.1,[http/1.1]}{0.0.0.0:35963}
+  onejar [INFO] Started @1536ms
+  onejar [INFO] Html: <html><body><h1>OK</h1></body></html>
+  onejar [INFO] Json: {"key":"value"}
+  onejar [INFO] Xml: <HashMap><key>value</key></HashMap>
+  onejar [INFO] Stopped ServerConnector@1db0ec27{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  onejar [INFO] Stopped o.e.j.s.ServletContextHandler@3fcdcf{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-onejar-2) @ emjar-demo ---
-jan 22, 2017 12:27:58 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
-2017-01-22 00:27:58.991:INFO::main: Logging initialized @1111ms
-2017-01-22 00:27:59.039:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:27:59.645:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@527740a2{/,null,AVAILABLE}
-2017-01-22 00:27:59.659:INFO:oejs.AbstractConnector:main: Started ServerConnector@6ddf90b0{HTTP/1.1,[http/1.1]}{0.0.0.0:35381}
-2017-01-22 00:27:59.659:INFO:oejs.Server:main: Started @1779ms
+  onejar [INFO] Running test (classpath scanning)
+  onejar [INFO] BouncyCastle security provider loaded successfully
+  onejar [INFO] Logging initialized @1025ms
+  onejar [INFO] jetty-9.3.15.v20161220
+  onejar [INFO] Started o.e.j.s.ServletContextHandler@39fc6b2c{/,null,AVAILABLE}
+  onejar [INFO] Started ServerConnector@126be319{HTTP/1.1,[http/1.1]}{0.0.0.0:40943}
+  onejar [INFO] Started @1411ms
 javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.convertToException(JerseyInvocation.java:1020)
         at org.glassfish.jersey.client.JerseyInvocation.translate(JerseyInvocation.java:819)
@@ -197,36 +200,32 @@ javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.invoke(JerseyInvocation.java:697)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.method(JerseyInvocation.java:420)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.get(JerseyInvocation.java:316)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
+        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:51)
         at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
         at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
         at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
         at java.lang.reflect.Method.invoke(Method.java:498)
         at com.simontuffs.onejar.Boot.run(Boot.java:342)
         at com.simontuffs.onejar.Boot.main(Boot.java:168)
-2017-01-22 00:27:59.845:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@6ddf90b0{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:27:59.851:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@527740a2{/,null,UNAVAILABLE}
+  onejar [INFO] Stopped ServerConnector@126be319{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  onejar [INFO] Stopped o.e.j.s.ServletContextHandler@39fc6b2c{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-springboot-1) @ emjar-demo ---
-jan 22, 2017 12:28:00 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:28:00.276:INFO::main: Logging initialized @388ms
-2017-01-22 00:28:00.400:INFO:oejs.Server:main: jetty-9.3.15.v20161220
-2017-01-22 00:28:01.296:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@10bdf5e5{/,null,AVAILABLE}
-2017-01-22 00:28:01.310:INFO:oejs.AbstractConnector:main: Started ServerConnector@78c03f1f{HTTP/1.1,[http/1.1]}{0.0.0.0:42741}
-2017-01-22 00:28:01.311:INFO:oejs.Server:main: Started @1423ms
-jan 22, 2017 12:28:01 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:28:01 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:28:01 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:28:01.980:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@78c03f1f{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:28:01.986:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@10bdf5e5{/,null,UNAVAILABLE}
+  springboot [INFO] Running test (explicit registration)
+  springboot [INFO] BouncyCastle security provider loaded successfully
+  springboot [INFO] Logging initialized @1304ms
+  springboot [INFO] jetty-9.3.15.v20161220
+  springboot [INFO] Started o.e.j.s.ServletContextHandler@6e6c3152{/,null,AVAILABLE}
+  springboot [INFO] Started ServerConnector@6737fd8f{HTTP/1.1,[http/1.1]}{0.0.0.0:37601}
+  springboot [INFO] Started @2040ms
+  springboot [INFO] Html: <html><body><h1>OK</h1></body></html>
+  springboot [INFO] Json: {"key":"value"}
+  springboot [INFO] Xml: <HashMap><key>value</key></HashMap>
+  springboot [INFO] Stopped ServerConnector@6737fd8f{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  springboot [INFO] Stopped o.e.j.s.ServletContextHandler@6e6c3152{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-springboot-2) @ emjar-demo ---
-jan 22, 2017 12:28:02 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
+  springboot [INFO] Running test (classpath scanning)
 Exception in thread "main" java.lang.reflect.InvocationTargetException
         at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
         at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
@@ -245,7 +244,7 @@ Caused by: org.glassfish.jersey.server.internal.scanning.ResourceFinderException
         at org.glassfish.jersey.server.internal.scanning.PackageNamesScanner.<init>(PackageNamesScanner.java:110)
         at org.glassfish.jersey.server.ResourceConfig.packages(ResourceConfig.java:680)
         at org.glassfish.jersey.server.ResourceConfig.packages(ResourceConfig.java:660)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:21)
+        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:27)
         ... 8 more
 Caused by: java.io.FileNotFoundException: /home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-springboot.jar!/BOOT-INF/classes (No such file or directory)
         at java.io.FileInputStream.open0(Native Method)
@@ -260,30 +259,27 @@ Caused by: java.io.FileNotFoundException: /home/argggh/telenor/src/commons/emjar
         ... 16 more
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-jarinjar-1) @ emjar-demo ---
-jan 22, 2017 12:28:02 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (explicit registration)
-2017-01-22 00:28:02.829:INFO::main: Logging initialized @426ms
-2017-01-22 00:28:03.214:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
-2017-01-22 00:28:04.574:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@6ef7623{/,null,AVAILABLE}
-2017-01-22 00:28:04.601:INFO:oejs.AbstractConnector:main: Started ServerConnector@648ee871{HTTP/1.1,[http/1.1]}{0.0.0.0:38737}
-2017-01-22 00:28:04.602:INFO:oejs.Server:main: Started @2200ms
-jan 22, 2017 12:28:05 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Html: <html><body><h1>OK</h1></body></html>
-jan 22, 2017 12:28:05 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Json: {"key":"value"}
-jan 22, 2017 12:28:05 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: Xml: <HashMap><key>value</key></HashMap>
-2017-01-22 00:28:05.554:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@648ee871{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:28:05.560:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@6ef7623{/,null,UNAVAILABLE}
+  jarinjar [INFO] Running test (explicit registration)
+  jarinjar [INFO] BouncyCastle security provider loaded successfully
+  jarinjar [INFO] Logging initialized @880ms
+  jarinjar [INFO] jetty-9.3.z-SNAPSHOT
+  jarinjar [INFO] Started o.e.j.s.ServletContextHandler@39941489{/,null,AVAILABLE}
+  jarinjar [INFO] Started ServerConnector@1e3df614{HTTP/1.1,[http/1.1]}{0.0.0.0:45865}
+  jarinjar [INFO] Started @2027ms
+  jarinjar [INFO] Html: <html><body><h1>OK</h1></body></html>
+  jarinjar [INFO] Json: {"key":"value"}
+  jarinjar [INFO] Xml: <HashMap><key>value</key></HashMap>
+  jarinjar [INFO] Stopped ServerConnector@1e3df614{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  jarinjar [INFO] Stopped o.e.j.s.ServletContextHandler@39941489{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (execute-jarinjar-2) @ emjar-demo ---
-jan 22, 2017 12:28:05 AM com.comoyo.commons.emjar.demo.Demo main
-INFO: === Running test (classpath scanning)
-2017-01-22 00:28:05.977:INFO::main: Logging initialized @353ms
-2017-01-22 00:28:06.219:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
-2017-01-22 00:28:07.820:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@43b0ade{/,null,AVAILABLE}
-2017-01-22 00:28:07.834:INFO:oejs.AbstractConnector:main: Started ServerConnector@66434cc8{HTTP/1.1,[http/1.1]}{0.0.0.0:41235}
-2017-01-22 00:28:07.835:INFO:oejs.Server:main: Started @2211ms
+  jarinjar [INFO] Running test (classpath scanning)
+  jarinjar [INFO] BouncyCastle security provider loaded successfully
+  jarinjar [INFO] Logging initialized @908ms
+  jarinjar [INFO] jetty-9.3.z-SNAPSHOT
+  jarinjar [INFO] Started o.e.j.s.ServletContextHandler@673e76b3{/,null,AVAILABLE}
+  jarinjar [INFO] Started ServerConnector@637791d{HTTP/1.1,[http/1.1]}{0.0.0.0:40075}
+  jarinjar [INFO] Started @2077ms
 javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.convertToException(JerseyInvocation.java:1020)
         at org.glassfish.jersey.client.JerseyInvocation.translate(JerseyInvocation.java:819)
@@ -296,19 +292,16 @@ javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.invoke(JerseyInvocation.java:697)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.method(JerseyInvocation.java:420)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.get(JerseyInvocation.java:316)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
+        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:51)
         at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
         at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
         at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
         at java.lang.reflect.Method.invoke(Method.java:498)
         at org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main(JarRsrcLoader.java:58)
-2017-01-22 00:28:08.336:INFO:oejs.AbstractConnector:main: Stopped ServerConnector@66434cc8{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
-2017-01-22 00:28:08.342:INFO:oejsh.ContextHandler:main: Stopped o.e.j.s.ServletContextHandler@43b0ade{/,null,UNAVAILABLE}
+  jarinjar [INFO] Stopped ServerConnector@637791d{HTTP/1.1,[http/1.1]}{0.0.0.0:0}
+  jarinjar [INFO] Stopped o.e.j.s.ServletContextHandler@673e76b3{/,null,UNAVAILABLE}
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (fencepost) @ emjar-demo ---
-openjdk version "1.8.0_111"
-OpenJDK Runtime Environment (build 1.8.0_111-b16)
-OpenJDK 64-Bit Server VM (build 25.111-b16, mixed mode)
 
 com.comoyo.commons:emjar-demo:1.4-SNAPSHOT
 

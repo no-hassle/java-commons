@@ -21,6 +21,8 @@
     <jetty.version>9.3.15.v20161220</jetty.version>
     <jersey.version>2.25</jersey.version>
     <jackson.version>2.8.6</jackson.version>
+    <java.executable>java</java.executable>
+    <logging.format>[%4$s] %5$s%6$s%n</logging.format>
   </properties>
 
   <dependencies>
@@ -129,7 +131,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>java</executable>
+              <executable>${java.executable}</executable>
               <workingDirectory>${project.build.directory}</workingDirectory>
               <arguments>
                 <argument>-version</argument>
@@ -175,9 +177,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  bare ${logging.format}</argument>
                     <argument>-cp</argument>
                     <argument>classes/:${bare.classpath}</argument>
                     <argument>${main.class}</argument>
@@ -191,9 +194,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  bare ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-cp</argument>
                     <argument>classes/:${bare.classpath}</argument>
@@ -237,9 +241,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  emjar ${logging.format}</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-emjar.jar</argument>
                   </arguments>
@@ -252,9 +257,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  emjar ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-emjar.jar</argument>
@@ -321,9 +327,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  shade ${logging.format}</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-shaded.jar</argument>
                   </arguments>
@@ -336,9 +343,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  shade ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-shaded.jar</argument>
@@ -417,9 +425,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  onejar ${logging.format}</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-onejar.jar</argument>
                   </arguments>
@@ -432,9 +441,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  onejar ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-onejar.jar</argument>
@@ -481,9 +491,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  springboot ${logging.format}</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-springboot.jar</argument>
                   </arguments>
@@ -500,9 +511,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  springboot ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-springboot.jar</argument>
@@ -606,9 +618,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  jarinjar ${logging.format}</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-jarinjar.jar</argument>
                   </arguments>
@@ -621,9 +634,10 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>java</executable>
+                  <executable>${java.executable}</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
+                    <argument>-Djava.util.logging.SimpleFormatter.format=  jarinjar ${logging.format}</argument>
                     <argument>-Demjar.demo.classpath-scanning</argument>
                     <argument>-jar</argument>
                     <argument>emjar-demo-${project.version}-jarinjar.jar</argument>

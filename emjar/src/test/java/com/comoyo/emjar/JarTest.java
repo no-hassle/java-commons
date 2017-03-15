@@ -40,7 +40,8 @@ public abstract class JarTest extends EmJarTest
         throws Exception
     {
         final File bundle = getResourceFile("bundle-" + name + ".jar");
-        final JarURLConnection conn = getJarUrlConnection(bundle, "lib-" + name + ".jar", "");
+        final JarURLConnection conn = getJarUrlConnection(
+                bundle, "lib-" + name + ".jar", "entry-" + name + ".txt");
         final JarFile jar = conn.getJarFile();
         final BufferedReader entry
             = new BufferedReader(new InputStreamReader(

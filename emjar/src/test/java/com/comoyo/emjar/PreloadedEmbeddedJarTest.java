@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
 public class PreloadedEmbeddedJarTest
     extends JarTest
 {
+    @Override
     public JarURLConnection getJarUrlConnection(File root, String jarName, String entryName)
         throws Exception
     {
