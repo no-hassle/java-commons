@@ -14,7 +14,7 @@ some of the other fat jar alternatives in a Maven flow (which is not
 to say that they all represent best practices).
 
 Refer to the [pom](pom.xml) and [source
-code](src/main/java/com/comoyo/commons/emjar/demo/Demo.java) for some
+code](src/main/java/no/hassle/emjar/demo/Demo.java) for some
 comments about the peculiarites of the different alternatives.
 
 Run `mvn clean verify -Dmaven.profile
@@ -121,8 +121,8 @@ by the different tools under different circumstances:
 java.security.NoSuchProviderException: JCE cannot authenticate the provider BC
         at javax.crypto.JceSecurity.getInstance(JceSecurity.java:100)
         at javax.crypto.KeyAgreement.getInstance(KeyAgreement.java:230)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
-Caused by: java.util.jar.JarException: file:/home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
+        at no.hassle.emjar.demo.Demo.main(Demo.java:36)
+Caused by: java.util.jar.JarException: file:/home/argggh/src/java-commons/emjar-demo/target/emjar-demo-2.0-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
         at javax.crypto.JarVerifier.verifySingleJar(JarVerifier.java:500)
         at javax.crypto.JarVerifier.verifyJars(JarVerifier.java:361)
         at javax.crypto.JarVerifier.verify(JarVerifier.java:289)
@@ -146,8 +146,8 @@ Caused by: java.util.jar.JarException: file:/home/argggh/telenor/src/commons/emj
 java.security.NoSuchProviderException: JCE cannot authenticate the provider BC
         at javax.crypto.JceSecurity.getInstance(JceSecurity.java:100)
         at javax.crypto.KeyAgreement.getInstance(KeyAgreement.java:230)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:36)
-Caused by: java.util.jar.JarException: file:/home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
+        at no.hassle.emjar.demo.Demo.main(Demo.java:36)
+Caused by: java.util.jar.JarException: file:/home/argggh/src/java-commons/emjar-demo/target/emjar-demo-2.0-SNAPSHOT-shaded.jar has unsigned entries - jetty-logging.properties
         at javax.crypto.JarVerifier.verifySingleJar(JarVerifier.java:500)
         at javax.crypto.JarVerifier.verifyJars(JarVerifier.java:361)
         at javax.crypto.JarVerifier.verify(JarVerifier.java:289)
@@ -200,7 +200,7 @@ javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.invoke(JerseyInvocation.java:697)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.method(JerseyInvocation.java:420)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.get(JerseyInvocation.java:316)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:51)
+        at no.hassle.emjar.demo.Demo.main(Demo.java:51)
         at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
         at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
         at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -235,7 +235,7 @@ Exception in thread "main" java.lang.reflect.InvocationTargetException
         at org.springframework.boot.loader.Launcher.launch(Launcher.java:87)
         at org.springframework.boot.loader.Launcher.launch(Launcher.java:50)
         at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:51)
-Caused by: org.glassfish.jersey.server.internal.scanning.ResourceFinderException: java.io.FileNotFoundException: /home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-springboot.jar!/BOOT-INF/classes (No such file or directory)
+Caused by: org.glassfish.jersey.server.internal.scanning.ResourceFinderException: java.io.FileNotFoundException: /home/argggh/src/java-commons/emjar-demo/target/emjar-demo-2.0-SNAPSHOT-springboot.jar!/BOOT-INF/classes (No such file or directory)
         at org.glassfish.jersey.server.internal.scanning.JarZipSchemeResourceFinderFactory.create(JarZipSchemeResourceFinderFactory.java:89)
         at org.glassfish.jersey.server.internal.scanning.JarZipSchemeResourceFinderFactory.create(JarZipSchemeResourceFinderFactory.java:65)
         at org.glassfish.jersey.server.internal.scanning.PackageNamesScanner.addResourceFinder(PackageNamesScanner.java:282)
@@ -244,9 +244,9 @@ Caused by: org.glassfish.jersey.server.internal.scanning.ResourceFinderException
         at org.glassfish.jersey.server.internal.scanning.PackageNamesScanner.<init>(PackageNamesScanner.java:110)
         at org.glassfish.jersey.server.ResourceConfig.packages(ResourceConfig.java:680)
         at org.glassfish.jersey.server.ResourceConfig.packages(ResourceConfig.java:660)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:27)
+        at no.hassle.emjar.demo.Demo.main(Demo.java:27)
         ... 8 more
-Caused by: java.io.FileNotFoundException: /home/argggh/telenor/src/commons/emjar-demo/target/emjar-demo-1.4-SNAPSHOT-springboot.jar!/BOOT-INF/classes (No such file or directory)
+Caused by: java.io.FileNotFoundException: /home/argggh/src/java-commons/emjar-demo/target/emjar-demo-2.0-SNAPSHOT-springboot.jar!/BOOT-INF/classes (No such file or directory)
         at java.io.FileInputStream.open0(Native Method)
         at java.io.FileInputStream.open(FileInputStream.java:195)
         at java.io.FileInputStream.<init>(FileInputStream.java:138)
@@ -292,7 +292,7 @@ javax.ws.rs.NotFoundException: HTTP 404 Not Found
         at org.glassfish.jersey.client.JerseyInvocation.invoke(JerseyInvocation.java:697)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.method(JerseyInvocation.java:420)
         at org.glassfish.jersey.client.JerseyInvocation$Builder.get(JerseyInvocation.java:316)
-        at com.comoyo.commons.emjar.demo.Demo.main(Demo.java:51)
+        at no.hassle.emjar.demo.Demo.main(Demo.java:51)
         at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
         at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
         at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -303,7 +303,7 @@ javax.ws.rs.NotFoundException: HTTP 404 Not Found
 [INFO]
 [INFO] --- exec-maven-plugin:1.4.0:exec (fencepost) @ emjar-demo ---
 
-com.comoyo.commons:emjar-demo:1.4-SNAPSHOT
+no.hassle.commons:emjar-demo:2.0-SNAPSHOT
 
   clean 89ms
     org.apache.maven.plugins:maven-clean-plugin:2.5 (default-clean) 85ms
@@ -339,7 +339,7 @@ com.comoyo.commons:emjar-demo:1.4-SNAPSHOT
   package 7s 48ms
     org.apache.maven.plugins:maven-source-plugin:2.4 (attach-sources) 168ms
     org.apache.maven.plugins:maven-javadoc-plugin:2.10.3 (attach-javadocs) 1s 897ms
-    com.comoyo.commons:emjar-maven-plugin:1.4-SNAPSHOT (package-emjar) 407ms
+    no.hassle.commons:emjar-maven-plugin:2.0-SNAPSHOT (package-emjar) 407ms
     org.apache.maven.plugins:maven-shade-plugin:2.4.3 (package-shade) 1s 851ms
     org.apache.maven.plugins:maven-assembly-plugin:2.4 (package-onejar) 1s 827ms
     org.apache.maven.plugins:maven-assembly-plugin:2.4 (package-jarinjar) 599ms
