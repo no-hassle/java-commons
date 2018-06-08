@@ -34,6 +34,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -147,6 +148,14 @@ public class ProtocBundledMojo extends AbstractMojo
     private File[] inputDirectories;
 
     /**
+     * Directories containing *.proto files available to import.
+     *
+     * @parameter
+     *     property="importDirectories"
+     */
+    private File[] importDirectories;
+
+    /**
      * Output directory for generated Java class files.
      *
      * @parameter
@@ -162,6 +171,14 @@ public class ProtocBundledMojo extends AbstractMojo
      *     property="testInputDirectories"
      */
     private File[] testInputDirectories;
+
+    /**
+     * Directories containing *.proto files available to import for test.
+     *
+     * @parameter
+     *     property="testImportDirectories"
+     */
+    private File[] testImportDirectories;
 
     /**
      * Output directory for generated Java class files.
@@ -353,15 +370,20 @@ public class ProtocBundledMojo extends AbstractMojo
      * @param dir   base dir for input file, used to resolve includes
      * @param input   input file to compile
      */
-    private void compileFile(File inputDir, File input, File outputDir)
+    private void compileFile(File inputDir, File input, File outputDir, File[] importDirs)
         throws MojoExecutionException
     {
         try {
+            List<String> command = new ArrayList<String>();
+            command.add(protocExec.toString());
+            command.add("--proto_path=" + inputDir.getAbsolutePath());
+            for (File importDir : importDirs) {
+                command.add("--proto_path=" + importDir.getAbsolutePath());
+            }
+            command.add("--java_out=" + outputDir);
+            command.add(input.getAbsolutePath());
             final Process proc
-                = new ProcessBuilder(protocExec.toString(),
-                                     "--proto_path=" + inputDir.getAbsolutePath(),
-                                     "--java_out=" + outputDir,
-                                     input.getAbsolutePath())
+                = new ProcessBuilder(command.toArray(new String[command.size()]))
                 .redirectErrorStream(true)
                 .start();
             final BufferedReader procOut
@@ -389,7 +411,7 @@ public class ProtocBundledMojo extends AbstractMojo
      * Compile all *.proto files found under inputDirectories.
      *
      */
-    private boolean compileAllFiles(String tag, File[] inputDirs, File outputDir)
+    private boolean compileAllFiles(String tag, File[] inputDirs, File[] importDirs, File outputDir)
         throws MojoExecutionException
     {
         final IOFileFilter filter = new SuffixFileFilter(".proto");
@@ -407,7 +429,7 @@ public class ProtocBundledMojo extends AbstractMojo
                 = FileUtils.iterateFiles(inputDir, filter, TrueFileFilter.INSTANCE);
             while (files.hasNext()) {
                 final File input = files.next();
-                compileFile(inputDir, input, outputDir);
+                compileFile(inputDir, input, outputDir, importDirs);
                 seen = true;
             }
         }
@@ -427,14 +449,14 @@ public class ProtocBundledMojo extends AbstractMojo
         if (inputDirectories.length == 0) {
             inputDirectories = new File[]{new File(project.getBasedir(), "src/main/protobuf")};
         }
-        if (compileAllFiles("main", inputDirectories, outputDirectory)) {
+        if (compileAllFiles("main", inputDirectories, importDirectories, outputDirectory)) {
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
         }
 
         if (testInputDirectories.length == 0) {
             testInputDirectories = new File[]{new File(project.getBasedir(), "src/test/protobuf")};
         }
-        if (compileAllFiles("test", testInputDirectories, testOutputDirectory)) {
+        if (compileAllFiles("test", testInputDirectories, testImportDirectories, testOutputDirectory)) {
             project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
         }
     }
