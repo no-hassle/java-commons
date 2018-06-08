@@ -1,9 +1,9 @@
-commons
-=======
+java-commons
+============
 
 This is a collection of Java components that have proven useful across
 different code repositories, initially in the Telenor Digital (née
-Comoyo) Communications group
+Comoyo) Communications group.
 
 The list of components currently reads as follows:
 

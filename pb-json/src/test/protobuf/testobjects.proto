@@ -1,5 +1,5 @@
 package pbjson;
-option java_package = "com.comoyo.protobuf.json";
+option java_package = "no.hassle.protobuf.json";
 option java_outer_classname = "TestObjects";
 
 enum Enumeration {
